@@ -13,7 +13,7 @@
         .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
         .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
         .btn { background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .btn-zap { background: var(--d); margin-bottom: 15px; }
+        .btn-zap { background: var(--d); margin-bottom: 15px; display: block; text-align: center; text-decoration: none; }
         .low-stock { border-left: 5px solid var(--d); }
         .badge { float: right; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; }
         .bg-low { background: #ffe5ec; color: var(--d); }
@@ -23,7 +23,6 @@
         nav button.active { color: #fff; border-bottom: 2px solid #fff; }
         .hidden { display: none !important; }
         .cat-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
-        .btn-backup { background: #666; font-size: 0.7rem; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -39,7 +38,8 @@
             <select id="filtro-cat" class="input" onchange="renderHome()" style="flex: 1; font-size: 12px;"></select>
         </div>
 
-        <div id="lista-home"></div>
+        <div id="lista-home">
+            </div>
     </section>
 
     <section id="t-cadastro" class="hidden">
@@ -68,8 +68,6 @@
             </div>
             <div id="lista-cats"></div>
         </div>
-        
-        <button class="btn btn-backup" onclick="exportarDados()">💾 COPIAR BACKUP (SINCRONIZAR)</button>
     </section>
 </div>
 
@@ -81,9 +79,8 @@
 </nav>
 
 <script>
-    // Chaves mantidas para não perder seus dados
-    let prods = JSON.parse(localStorage.getItem('ss_p')) || [];
-    let cats = JSON.parse(localStorage.getItem('ss_c')) || ["Alimentos", "Limpeza", "Higiene"];
+    var prods = JSON.parse(localStorage.getItem('ss_p')) || [];
+    var cats = JSON.parse(localStorage.getItem('ss_c')) || ["Alimentos", "Limpeza", "Higiene"];
 
     function persistir() {
         localStorage.setItem('ss_p', JSON.stringify(prods));
@@ -92,9 +89,9 @@
     }
 
     function atualizarSelects() {
-        let h = "";
-        let f = '<option value="Todos">Categorias</option>';
-        cats.sort().forEach(c => {
+        var h = "";
+        var f = '<option value="Todos">Categorias</option>';
+        cats.sort().forEach(function(c) {
             h += '<option value="'+c+'">'+c+'</option>';
             f += '<option value="'+c+'">'+c+'</option>';
         });
@@ -103,18 +100,22 @@
     }
 
     function mudar(tela) {
-        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('section').forEach(function(s) { s.classList.add('hidden'); });
+        document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+        
         document.getElementById('t-' + tela).classList.remove('hidden');
         document.getElementById('b-' + tela).classList.add('active');
+        
+        // Sempre que mudar para o início ou estoque, forçamos a renderização
         if(tela === 'inicio') renderHome();
         if(tela === 'estoque') renderEstoque();
         if(tela === 'config') renderCats();
     }
 
     function salvar() {
-        let n = document.getElementById('p-nome').value;
-        if(!n) return alert("Nome vazio!");
+        var n = document.getElementById('p-nome').value;
+        if(!n) { alert("Nome vazio!"); return; }
+        
         prods.push({
             id: Date.now(),
             n: n,
@@ -126,40 +127,51 @@
         });
         persistir();
         alert("Salvo!");
-        document.querySelectorAll('#t-cadastro input').forEach(i => i.value = '');
+        document.querySelectorAll('#t-cadastro input').forEach(function(i) { i.value = ''; });
         mudar('inicio');
     }
 
     function renderHome() {
-        let container = document.getElementById('lista-home');
-        let busca = document.getElementById('busca').value.toLowerCase();
-        let filtro = document.getElementById('filtro-cat').value;
-        let html = "";
-        let temFalta = false;
+        var container = document.getElementById('lista-home');
+        var busca = document.getElementById('busca').value.toLowerCase();
+        var filtro = document.getElementById('filtro-cat').value;
+        var html = "";
+        var temFalta = false;
 
-        prods.sort((a,b) => a.n.localeCompare(b.n)).forEach(p => {
-            let matchBusca = p.n.toLowerCase().includes(busca) || p.m.toLowerCase().includes(busca);
-            let matchCat = filtro === "Todos" || p.c === filtro;
+        // Limpa a lista antes de começar
+        container.innerHTML = "";
+
+        prods.sort(function(a,b) { return a.n.localeCompare(b.n); }).forEach(function(p) {
+            var matchBusca = p.n.toLowerCase().indexOf(busca) > -1 || p.m.toLowerCase().indexOf(busca) > -1;
+            var matchCat = filtro === "Todos" || p.c === filtro;
 
             if(matchBusca && matchCat) {
-                let falta = p.i - p.a;
-                let low = falta > 0;
+                var falta = p.i - p.a;
+                var low = falta > 0;
                 if(low) temFalta = true;
 
                 html += '<div class="card ' + (low ? 'low-stock' : '') + '">' +
                         '<span class="badge ' + (low ? 'bg-low' : 'bg-ok') + '">' + (low ? 'FALTA' : 'OK') + '</span>' +
                         '<strong>' + p.n + '</strong><br><small>' + p.m + ' ('+p.c+')</small><br>' +
-                        (low ? '<b style="color:var(--d)">Faltam: ' + falta + ' ' + p.u + '</b>' : '<span style="color:var(--s)">Estoque OK</span>') +
-                        '<br><small style="color:#999">Ideal: '+p.i+' | Atual: '+p.a+'</small></div>';
+                        (low ? '<b style="color:var(--d); display:block; margin-top:5px;">Faltam: ' + falta + ' ' + p.u + '</b>' : '<span style="color:var(--s); display:block; margin-top:5px;">Estoque OK</span>') +
+                        '<small style="color:#999">Ideal: '+p.i+' | Atual: '+p.a+'</small></div>';
             }
         });
-        document.getElementById('btn-zap').classList.toggle('hidden', !temFalta);
-        container.innerHTML = html || "<p style='text-align:center; color:#999;'>Nenhum item.</p>";
+
+        // Controle do botão do WhatsApp
+        var btnZap = document.getElementById('btn-zap');
+        if(temFalta) {
+            btnZap.classList.remove('hidden');
+        } else {
+            btnZap.classList.add('hidden');
+        }
+
+        container.innerHTML = html || "<p style='text-align:center; color:#999; padding-top:20px;'>Nenhum item para exibir.</p>";
     }
 
     function renderEstoque() {
-        let h = "";
-        prods.sort((a,b) => a.n.localeCompare(b.n)).forEach(p => {
+        var h = "";
+        prods.sort(function(a,b) { return a.n.localeCompare(b.n); }).forEach(function(p) {
             h += '<div class="card"><strong>' + p.n + '</strong>' +
                  '<button onclick="deleteP('+p.id+')" style="float:right; border:none; background:none; color:red; font-weight:bold;">🗑️</button>' +
                  '<div style="margin-top:10px; display:flex; align-items:center; gap:10px;">' +
@@ -170,42 +182,66 @@
     }
 
     function atu(id, v) {
-        let i = prods.findIndex(x => x.id === id);
-        prods[i].a = parseInt(v) || 0;
-        persistir();
+        var idx = prods.findIndex(function(x) { return x.id === id; });
+        if(idx > -1) {
+            prods[idx].a = parseInt(v) || 0;
+            persistir();
+        }
     }
 
     function deleteP(id) {
-        if(confirm("Excluir?")) { prods = prods.filter(x => x.id !== id); persistir(); renderEstoque(); }
+        if(confirm("Excluir?")) { 
+            prods = prods.filter(function(x) { return x.id !== id; }); 
+            persistir(); 
+            renderEstoque(); 
+        }
     }
 
     function addCat() {
-        let n = document.getElementById('new-cat').value;
-        if(n && !cats.includes(n)) { cats.push(n); persistir(); renderCats(); document.getElementById('new-cat').value = ""; }
+        var n = document.getElementById('new-cat').value;
+        if(n && cats.indexOf(n) === -1) { 
+            cats.push(n); 
+            persistir(); 
+            renderCats(); 
+            document.getElementById('new-cat').value = ""; 
+        }
     }
 
     function renderCats() {
-        let h = "";
-        cats.sort().forEach(c => h += '<div class="cat-item"><span>'+c+'</span><button onclick="delCat(\''+c+'\')" style="color:red; border:none; background:none; font-weight:bold;">X</button></div>');
+        var h = "";
+        cats.sort().forEach(function(c) { 
+            h += '<div class="cat-item"><span>'+c+'</span><button onclick="delCat(\''+c+'\')" style="color:red; border:none; background:none; font-weight:bold;">X</button></div>'; 
+        });
         document.getElementById('lista-cats').innerHTML = h;
     }
 
     function delCat(n) {
-        if(prods.some(p => p.c === n)) return alert("Categoria em uso!");
-        cats = cats.filter(c => c !== n); persistir(); renderCats();
+        if(prods.some(function(p) { return p.c === n; })) { 
+            alert("Categoria em uso!"); 
+            return; 
+        }
+        cats = cats.filter(function(c) { return c !== n; }); 
+        persistir(); 
+        renderCats();
     }
 
     function enviarZap() {
-        let m = "*🛒 MINHA LISTA DE COMPRAS*\n\n";
-        prods.forEach(p => { if(p.i > p.a) m += "• *" + p.n + "*: Faltam " + (p.i - p.a) + " " + p.u + "\n"; });
-        window.open("https://wa.me/?text=" + encodeURIComponent(m));
+        var m = "*🛒 MINHA LISTA DE COMPRAS*\n\n";
+        var itensFaltantes = false;
+        prods.forEach(function(p) { 
+            if(p.i > p.a) { 
+                m += "• *" + p.n + "*: Faltam " + (p.i - p.a) + " " + p.u + "\n"; 
+                itensFaltantes = true;
+            } 
+        });
+        if(itensFaltantes) {
+            window.open("https://wa.me/?text=" + encodeURIComponent(m));
+        } else {
+            alert("Nada faltando no momento!");
+        }
     }
 
-    function exportarDados() {
-        let d = JSON.stringify({p: prods, c: cats});
-        prompt("Copie este código para salvar ou sincronizar:", d);
-    }
-
+    // Inicialização
     persistir();
     renderHome();
 </script>
