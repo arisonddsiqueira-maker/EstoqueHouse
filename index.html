@@ -3,33 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Stock Pro</title>
+    <title>Smart Stock</title>
     <style>
-        :root { --p: #4361ee; --d: #f72585; --s: #4caf50; --t: #2b2d42; --bg: #f4f7fa; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; color: var(--t); }
-        header { background: #fff; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; position: sticky; top:0; z-index:10; }
-        h1 { margin: 0; font-size: 1.2rem; color: var(--p); }
+        * { box-sizing: border-box; font-family: sans-serif; }
+        body { background: #f0f2f5; margin: 0; padding-bottom: 80px; color: #333; }
+        header { background: #4361ee; color: white; padding: 15px; text-align: center; position: sticky; top: 0; z-index: 10; shadow: 0 2px 5px rgba(0,0,0,0.2); }
         .container { padding: 10px; max-width: 500px; margin: auto; }
-        .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
-        .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .btn { background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
-        .btn-zap { background: var(--d); margin-bottom: 15px; }
-        .low-stock { border-left: 5px solid var(--d); }
-        .badge { float: right; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; }
-        .bg-low { background: #ffe5ec; color: var(--d); }
-        .bg-ok { background: #e8f5e9; color: var(--s); }
-        nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
-        nav button { background: none; border: none; color: #888; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
-        nav button.active { color: #fff; }
+        .card { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 16px; }
+        .btn { background: #4361ee; color: white; border: none; padding: 12px; border-radius: 8px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .btn-zap { background: #f72585; margin-bottom: 10px; }
+        .btn-add { background: #4caf50; width: auto; padding: 10px 15px; }
+        .low-stock { border-left: 5px solid #f72585; }
+        .badge { float: right; padding: 4px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; background: #eee; }
+        .badge-red { background: #ffe5ec; color: #f72585; }
+        .badge-green { background: #e8f5e9; color: #4caf50; }
+        nav { position: fixed; bottom: 0; width: 100%; background: #222; display: flex; justify-content: space-around; padding: 15px 0; z-index: 100; }
+        nav button { background: none; border: none; color: #aaa; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
+        nav button.active { color: #fff; border-bottom: 2px solid #fff; }
         .hidden { display: none !important; }
-        .backup-btn { background: #eee; color: #666; font-size: 0.6rem; padding: 5px; border: 1px solid #ccc; margin-top: 20px; border-radius: 5px; width: 100%; }
+        .cat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-<header><h1>Smart Stock 📦</h1></header>
+<header><h1 style="margin:0; font-size:1.2rem;">Smart Stock 📦</h1></header>
 
 <div class="container">
-    <section id="t-inicio">
-        <button id="btn-zap" class="btn btn-zap hidden" onclick="enviarZap()">🛒 ENVIAR LISTA PARA WHATSAPP</button>
-        <input type="text" id="busca" class="input
+    <section id="tela-inicio">
+        <button id="btn-whatsapp" class="btn btn-zap hidden" onclick="enviarLista()">📲 ENVIAR LISTA (WHATSAPP)</button>
+        <input type="text" id="campo-busca" class="input" placeholder="🔍 Buscar produto..." oninput="montarListaInicio()">
+        <div id="container-lista-inicio"></div>
+    </section>
+
+    <section id="tela-cadastro" class="hidden">
+        <div class="card">
+            <h3>Novo Produto</h3>
+            <input type="text" id="nome-p" class="input" placeholder="Nome">
+            <input type="text" id="marca-p" class="input" placeholder="Marca">
+            <select id="cat-p" class="input"></select>
+            <input type="text" id="medida-p" class="input" placeholder="Medida (kg, un, l)">
+            <input type="number" id="atual-p" class="input" placeholder="Qtd Atual">
+            <input type="number" id="ideal-p" class="input" placeholder="Qtd Ideal (Meta)">
+            <button class="btn" onclick="salvarNovoProduto()">CADASTRAR</button>
+        </div>
+    </section>
+
+    <section id="tela-estoque" class="hidden">
+        <div id="container-lista-estoque"></div>
+    </section>
+
+    <section id="tela-config" class="hidden">
+        <div class="card">
+            <h3>Categorias</h3>
+            <div style="display:flex; gap:5px;">
+                <input type="text" id="nova-cat-nome" class="input" placeholder="Nova..." style="margin:0">
+                <button class="btn btn-add" onclick="salvarNovaCategoria()">+</button>
+            </div>
+            <div id="container-lista-categorias" style="margin-top:15px;"></div>
+        </div>
+        <div style="text-align:center; padding:20px;">
+            <button onclick="baixarBackup()" style="font-size:10px;">Baixar Backup Manual</button>
+        </div>
+    </section>
+</div>
+
+<nav>
+    <button onclick="trocarTela('inicio')" id="nav-inicio" class="active">INÍCIO</button>
+    <button onclick="trocarTela('cadastro')" id="nav-cadastro">NOVO</button>
+    <button onclick="trocarTela('estoque')" id="nav-estoque">ESTOQUE</button>
+    <button onclick="trocarTela('config')" id="nav-config">CONFIG</button>
+</nav>
+
+<script>
+    // Dados iniciais
+    var meusProdutos = JSON.parse(localStorage.getItem('ss_p')) || [];
+    var minhasCategorias = JSON.parse(localStorage.getItem('ss_c')) || ["Alimentos", "Limpeza", "Higiene"];
+
+    function gravarDados() {
+        localStorage.setItem('ss_p', JSON.stringify(meusProdutos));
+        localStorage.setItem('ss_c', JSON.stringify(minhasCategorias));
+        configurarSelectCategorias();
+    }
+
+    function configurarSelectCategorias() {
+        var combo = document.getElementById('cat-p');
+        var opcoes = "";
+        minhasCategorias.sort().forEach(function(c) {
+            opcoes += '<option value="'+c+'">'+c+'</option>';
+        });
+        combo.innerHTML = opcoes;
+    }
+
+    function trocarTela(nome) {
+        document.querySelectorAll('section').forEach(function(s) { s.classList.add('hidden'); });
+        document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+        
+        document.getElementById('tela-' + nome).classList.remove('hidden');
+        document.getElementById('nav-' + nome).classList.add('active');
+
+        if(nome === 'inicio') montarListaInicio();
+        if(nome === 'estoque') montarListaEstoque();
+        if(nome === 'config') montarListaCategorias();
+    }
+
+    function salvarNovoProduto() {
+        var nome = document.getElementById('nome-p').value;
+        if(!nome) { alert("Digite o nome!"); return; }
+
+        var p = {
+            id: Date.now(),
+            nome: nome,
+            marca: document.getElementById('marca-p').value,
+            cat: document.getElementById('cat-p').value,
+            med: document.getElementById('medida-p').value || 'un',
+            qtd: parseInt(document.getElementById('atual-p').value) || 0,
+            meta: parseInt(document.getElementById('ideal-p').value) || 0
+        };
+
+        meusProdutos.push(p);
+        gravarDados();
+        alert("Salvo!");
+        document.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+        trocarTela('inicio');
+    }
+
+    function montarListaInicio() {
+        var lista = document.getElementById('container-lista-inicio');
+        var busca = document.getElementById('campo-busca').value.toLowerCase();
+        var html = "";
+        var temFalta = false;
+
+        meusProdutos.forEach(function(p) {
+            if(p.nome.toLowerCase().includes(busca) || p.marca.toLowerCase().includes(busca)) {
+                var falta = p.meta - p.qtd;
+                var precisaComprar = falta > 0;
+                if(precisaComprar) temFalta = true;
+
+                html += '<div class="card ' + (precisaComprar ? 'low-stock' : '') + '">' +
+                        '<span class="badge ' + (precisaComprar ? 'badge-red' : 'badge-green') + '">' + (precisaComprar ? 'FALTA' : 'OK') + '</span>' +
+                        '<strong>' + p.nome + '</strong><br>' +
+                        '<small>' + p.marca + ' (' + p.cat + ')</small><br>' +
+                        (precisaComprar ? '<b style="color:#f72585; display:block; margin-top:5px;">Faltam: ' + falta + ' ' + p.med + '</b>' : '<span style="color:#4caf50">Estoque OK</span>') +
+                        '<small style="color:#999; display:block; margin-top:3px;">Ideal: ' + p.meta + ' ' + p.med + '</small>' +
+                        '</div>';
+            }
+        });
+
+        document.getElementById('btn-whatsapp').classList.toggle('hidden', !temFalta);
+        lista.innerHTML = html || "<p style='text-align:center; color:#999;'>Nenhum item.</p>";
+    }
+
+    function montarListaEstoque() {
+        var html = "";
+        meusProdutos.sort(function(a,b) { return a.nome.localeCompare(b.nome); }).forEach(function(p) {
+            html += '<div class="card"><strong>' + p.nome + '</strong>' +
+                    '<button onclick="apagarProduto('+p.id+')" style="float:right; border:none; background:none; color:red;">Apagar</button>' +
+                    '<div style="margin-top:10px;">Atual: <input type="number" value="'+p.qtd+'" onchange="atualizarEstoque('+p.id+', this.value)" style="width:70px; padding:5px; border-radius:5px; border:1px solid #ccc;">' +
+                    ' <small>Meta: '+p.meta+'</small></div></div>';
+        });
+        document.getElementById('container-lista-estoque').innerHTML = html || "<p style='text-align:center'>Vazio.</p>";
+    }
+
+    function atualizarEstoque(id, val) {
+        var idx = meusProdutos.findIndex(function(x) { return x.id === id; });
+        if(idx !== -1) {
+            meusProdutos[idx].qtd = parseInt(val) || 0;
+            gravarDados();
+        }
+    }
+
+    function apagarProduto(id) {
+        if(confirm("Deseja apagar?")) {
+            meusProdutos = meusProdutos.filter(function(x) { return x.id !== id; });
+            gravarDados();
+            montarListaEstoque();
+        }
+    }
+
+    function salvarNovaCategoria() {
+        var n = document.getElementById('nova-cat-nome').value;
+        if(n && !minhasCategorias.includes(n)) {
+            minhasCategorias.push(n);
+            gravarDados();
+            montarListaCategorias();
+            document.getElementById('nova-cat-nome').value = "";
+        }
+    }
+
+    function montarListaCategorias() {
+        var h = "";
+        minhasCategorias.sort().forEach(function(c) {
+            h += '<div class="cat-row"><span>'+c+'</span><button onclick="apagarCat(\''+c+'\')" style="color:red; border:none; background:none;">X</button></div>';
+        });
+        document.getElementById('container-lista-categorias').innerHTML = h;
+    }
+
+    function apagarCat(n) {
+        if(meusProdutos.some(function(p){ return p.cat === n; })) { alert("Categoria em uso!"); return; }
+        minhasCategorias = minhasCategorias.filter(function(c){ return c !== n; });
+        gravarDados();
+        montarListaCategorias();
+    }
+
+    function enviarLista() {
+        var msg = "*🛒 LISTA DE COMPRAS*\n\n";
+        meusProdutos.forEach(function(p) {
+            if(p.meta > p.qtd) {
+                msg += "• *" + p.nome + "*: Faltam " + (p.meta - p.qtd) + " " + p.med + "\n";
+            }
+        });
+        window.open("https://wa.me/?text=" + encodeURIComponent(msg));
+    }
+
+    function baixarBackup() {
+        var dados = JSON.stringify({p: meusProdutos, c: minhasCategorias});
+        alert("Seus dados atuais:\n\n" + dados + "\n\n(Copie e guarde se precisar)");
+    }
+
+    // Início
+    gravarDados();
+    montarListaInicio();
+</script>
+</body>
+</html>
