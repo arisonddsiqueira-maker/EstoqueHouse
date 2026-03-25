@@ -1,51 +1,305 @@
-function renderHome() {
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Stock | Final</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f4f7fa;
+            --primary: #4361ee;
+            --danger: #f72585;
+            --success: #4caf50;
+            --text: #2b2d42;
+            --card: #ffffff;
+        }
+
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding-bottom: 110px; color: var(--text); }
+        header { padding: 20px; background: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
+        h1 { margin: 0; font-size: 1.2rem; color: var(--primary); font-weight: 800; }
+        
+        .container { padding: 15px; max-width: 500px; margin: auto; }
+
+        /* Estilos de Input e Botões */
+        .search-box { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; outline: none; }
+        .controls { display: flex; gap: 8px; margin-bottom: 20px; }
+        select { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #eee; background: white; font-size: 0.85rem; cursor: pointer; }
+
+        /* Cards de Produto */
+        .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); position: relative; overflow: hidden; }
+        .card.low-stock { border-left: 5px solid var(--danger); }
+        
+        .prod-info h3 { margin: 0 0 4px 0; font-size: 1.05rem; }
+        .prod-info span.cat-tag { font-size: 0.7rem; color: #999; text-transform: uppercase; font-weight: 700; display: block; margin-bottom: 4px; }
+        
+        .badge { padding: 4px 10px; border-radius: 8px; font-size: 0.65rem; font-weight: 800; float: right; }
+        .low { background: #ffe5ec; color: var(--danger); }
+        .ok { background: #e8f5e9; color: var(--success); }
+
+        /* Navegação Inferior */
+        nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 450px; background: #1a1a1a; display: flex; border-radius: 24px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000; }
+        nav button { flex: 1; border: none; background: none; color: #777; padding: 10px 5px; font-size: 0.65rem; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        nav button.active { color: white; background: var(--primary); border-radius: 18px; }
+
+        .btn-full { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .shopping-alert { background: var(--danger); color: white; padding: 16px; border-radius: 14px; text-align: center; margin-bottom: 15px; font-weight: 800; cursor: pointer; font-size: 0.9rem; border: none; width: 100%; }
+        
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .hidden { display: none !important; }
+
+        .inv-controls { display: flex; align-items: center; gap: 12px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #eee; }
+        .inv-controls input { width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Smart Stock 📦</h1>
+    <div id="item-count" style="font-size: 0.7rem; background: #f0f0f0; padding: 4px 10px; border-radius: 20px; font-weight: bold;">0 ITENS</div>
+</header>
+
+<div class="container">
+    
+    <section id="tela-inicio">
+        <button id="btn-zap" class="shopping-alert hidden" onclick="enviarWhatsApp()">🛒 ENVIAR LISTA DE COMPRAS (ZAP)</button>
+        
+        <input type="text" id="busca" class="search-box" placeholder="Buscar por nome ou marca..." oninput="renderHome()">
+        
+        <div class="controls">
+            <select id="f-categoria" onchange="renderHome()"></select>
+            <select id="f-ordem" onchange="renderHome()">
+                <option value="az">Nome (A-Z)</option>
+                <option value="falta">Prioridade (Falta)</option>
+            </select>
+        </div>
+        
+        <div id="lista-home"></div>
+    </section>
+
+    <section id="tela-cadastro" class="hidden">
+        <div class="card">
+            <h2 style="margin:0 0 15px 0; font-size: 1.1rem;">Novo Produto</h2>
+            <input type="text" id="p-nome" class="search-box" placeholder="Nome (Ex: Arroz)">
+            <input type="text" id="p-marca" class="search-box" placeholder="Marca (Ex: Tio João)">
+            <select id="p-categoria-select" class="search-box"></select>
+            <input type="text" id="p-medida" class="search-box" placeholder="Medida (Ex: kg, Un, Litro)">
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="p-atual" class="search-box" placeholder="Qtd Atual">
+                <input type="number" id="p-ideal" class="search-box" placeholder="Meta Ideal">
+            </div>
+            <button class="btn-full" onclick="salvarProduto()">SALVAR NO ESTOQUE</button>
+        </div>
+    </section>
+
+    <section id="tela-contagem" class="hidden">
+        <h2 style="font-size: 1.1rem;">Ajustar Quantidades</h2>
+        <div id="lista-inventario"></div>
+    </section>
+
+    <section id="tela-config" class="hidden">
+        <div class="card">
+            <h2 style="margin:0 0 15px 0; font-size: 1.1rem;">Gerenciar Categorias</h2>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="nova-cat-nome" class="search-box" placeholder="Nova categoria..." style="margin:0">
+                <button onclick="adicionarCategoria()" style="background:var(--success); color:white; border:none; border-radius:12px; padding:0 15px; font-weight:bold; cursor:pointer">+</button>
+            </div>
+            <div id="lista-categorias-gestao" style="margin-top:20px;"></div>
+        </div>
+    </section>
+</div>
+
+<nav>
+    <button onclick="mudarTela('inicio')" id="btn-nav-inicio" class="active">🏠 INÍCIO</button>
+    <button onclick="mudarTela('cadastro')" id="btn-nav-cadastro">➕ NOVO</button>
+    <button onclick="mudarTela('contagem')" id="btn-nav-contagem">📋 ESTOQUE</button>
+    <button onclick="mudarTela('config')" id="btn-nav-config">⚙️ CAT.</button>
+</nav>
+
+<script>
+    // Banco de Dados Local
+    let produtos = JSON.parse(localStorage.getItem('ss_produtos')) || [];
+    let categorias = JSON.parse(localStorage.getItem('ss_categorias')) || ["Alimentos", "Limpeza", "Higiene", "Outros"];
+
+    function persistir() {
+        localStorage.setItem('ss_produtos', JSON.stringify(produtos));
+        localStorage.setItem('ss_categorias', JSON.stringify(categorias));
+        document.getElementById('item-count').innerText = `${produtos.length} ITENS`;
+        atualizarSelects();
+    }
+
+    function atualizarSelects() {
+        const fCat = document.getElementById('f-categoria');
+        const pCat = document.getElementById('p-categoria-select');
+        
+        let htmlFiltro = '<option value="Todos">Todas Categorias</option>';
+        let htmlCadastro = '';
+        
+        categorias.sort().forEach(c => {
+            htmlFiltro += `<option value="${c}">${c}</option>`;
+            htmlCadastro += `<option value="${c}">${c}</option>`;
+        });
+        
+        fCat.innerHTML = htmlFiltro;
+        pCat.innerHTML = htmlCadastro;
+    }
+
+    function mudarTela(tela) {
+        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById('tela-' + tela).classList.remove('hidden');
+        const btn = document.getElementById('btn-nav-' + tela);
+        if(btn) btn.classList.add('active');
+
+        if(tela === 'inicio') renderHome();
+        if(tela === 'contagem') renderContagem();
+        if(tela === 'config') renderCategorias();
+    }
+
+    // --- CATEGORIAS ---
+    function adicionarCategoria() {
+        const nome = document.getElementById('nova-cat-nome').value.trim();
+        if(!nome) return;
+        if(categorias.includes(nome)) return alert("Categoria já existe.");
+        categorias.push(nome);
+        document.getElementById('nova-cat-nome').value = '';
+        persistir();
+        renderCategorias();
+    }
+
+    function removerCategoria(nome) {
+        if(produtos.some(p => p.categoria === nome)) return alert("Categoria em uso por produtos!");
+        if(confirm(`Excluir "${nome}"?`)) {
+            categorias = categorias.filter(c => c !== nome);
+            persistir();
+            renderCategorias();
+        }
+    }
+
+    function renderCategorias() {
+        const container = document.getElementById('lista-categorias-gestao');
+        container.innerHTML = categorias.sort().map(c => `
+            <div class="item-row">
+                <span>${c}</span>
+                <button onclick="removerCategoria('${c}')" style="border:none; background:none; color:red; cursor:pointer">🗑️</button>
+            </div>
+        `).join('');
+    }
+
+    // --- PRODUTOS ---
+    function salvarProduto() {
+        const p = {
+            id: Date.now(),
+            nome: document.getElementById('p-nome').value.trim(),
+            marca: document.getElementById('p-marca').value.trim(),
+            categoria: document.getElementById('p-categoria-select').value,
+            medida: document.getElementById('p-medida').value.trim() || 'un',
+            atual: parseInt(document.getElementById('p-atual').value) || 0,
+            ideal: parseInt(document.getElementById('p-ideal').value) || 0
+        };
+
+        if(!p.nome) return alert("O nome é obrigatório!");
+        
+        produtos.push(p);
+        persistir();
+        document.querySelectorAll('#tela-cadastro input').forEach(i => i.value = '');
+        mudarTela('inicio');
+    }
+
+    function renderHome() {
         const container = document.getElementById('lista-home');
         const busca = document.getElementById('busca').value.toLowerCase();
         const filtroCat = document.getElementById('f-categoria').value;
         const ordem = document.getElementById('f-ordem').value;
-        
+
         let filtrados = produtos.filter(p => {
             const matchBusca = p.nome.toLowerCase().includes(busca) || p.marca.toLowerCase().includes(busca);
             const matchCat = filtroCat === 'Todos' || p.categoria === filtroCat;
             return matchBusca && matchCat;
         });
 
-        // Ordenação
         if(ordem === 'az') filtrados.sort((a,b) => a.nome.localeCompare(b.nome));
         else filtrados.sort((a,b) => (a.atual - a.ideal) - (b.atual - b.ideal));
 
-        // Mostrar/Esconder botão do WhatsApp
-        const temFaltaTotal = produtos.some(p => p.atual < p.ideal);
-        document.getElementById('btn-zap').classList.toggle('hidden', !temFaltaTotal);
+        document.getElementById('btn-zap').classList.toggle('hidden', !produtos.some(p => p.atual < p.ideal));
 
         if(filtrados.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:#999;">Nenhum produto encontrado.</div>';
+            container.innerHTML = '<p style="text-align:center; color:#999; margin-top:20px;">Nenhum item encontrado.</p>';
             return;
         }
 
         container.innerHTML = filtrados.map(p => {
             const falta = p.ideal - p.atual;
             const isLow = falta > 0;
-            
             return `
-                <div class="card" style="${isLow ? 'border-left: 5px solid var(--danger);' : ''}">
-                    <span class="badge ${isLow ? 'low' : 'ok'}">
-                        ${isLow ? 'COMPRAR' : 'ESTOQUE OK'}
-                    </span>
+                <div class="card ${isLow ? 'low-stock' : ''}">
+                    <span class="badge ${isLow ? 'low' : 'ok'}">${isLow ? 'FALTA' : 'OK'}</span>
                     <div class="prod-info">
-                        <span>${p.categoria} | ${p.marca}</span>
+                        <span class="cat-tag">${p.categoria} | ${p.marca}</span>
                         <h3>${p.nome}</h3>
-                        <div style="margin-top: 5px;">
+                        <div style="margin-top:8px;">
                             ${isLow 
-                                ? `<strong style="color:var(--danger); font-size:1.1rem;">Faltam: ${falta} ${p.medida}</strong>` 
-                                : `<span style="color:var(--success);">Estoque em dia (${p.atual} ${p.medida})</span>`
+                                ? `<strong style="color:var(--danger); font-size:1rem;">Faltam: ${falta} ${p.medida}</strong>` 
+                                : `<span style="color:var(--success); font-size:0.9rem;">Estoque em dia (${p.atual} ${p.medida})</span>`
                             }
                         </div>
-                        <small style="color: #888; display:block; margin-top:5px;">
-                            Meta ideal: ${p.ideal} ${p.medida}
-                        </small>
+                        <small style="color:#aaa; display:block; margin-top:4px;">Meta: ${p.ideal} ${p.medida}</small>
                     </div>
                 </div>
             `;
         }).join('');
     }
+
+    function renderContagem() {
+        const container = document.getElementById('lista-inventario');
+        container.innerHTML = produtos.sort((a,b) => a.nome.localeCompare(b.nome)).map(p => `
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center">
+                    <strong>${p.nome} (${p.medida})</strong>
+                    <button onclick="removerProduto(${p.id})" style="border:none; background:none; cursor:pointer">🗑️</button>
+                </div>
+                <div class="inv-controls">
+                    <span style="font-size:0.85rem;">Estoque Atual:</span>
+                    <input type="number" value="${p.atual}" onchange="atuQtd(${p.id}, this.value)">
+                    <small style="color:#888">Meta: ${p.ideal}</small>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function atuQtd(id, val) {
+        const i = produtos.findIndex(p => p.id === id);
+        if(i !== -1) {
+            produtos[i].atual = parseInt(val) || 0;
+            persistir();
+        }
+    }
+
+    function removerProduto(id) {
+        if(confirm("Remover este produto permanentemente?")) {
+            produtos = produtos.filter(p => p.id !== id);
+            persistir();
+            renderContagem();
+        }
+    }
+
+    function enviarWhatsApp() {
+        const faltantes = produtos.filter(p => p.atual < p.ideal);
+        if(faltantes.length === 0) return;
+        
+        let msg = "*🛒 LISTA DE COMPRAS SMART STOCK*\n\n";
+        faltantes.forEach(p => {
+            msg += `• *${p.nome}* (${p.marca})\n   Faltam: *${p.ideal - p.atual} ${p.medida}*\n\n`;
+        });
+        
+        window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
+    }
+
+    // Inicialização
+    persistir();
+    renderHome();
+</script>
+
+</body>
+</html>
