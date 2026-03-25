@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Stock Pro</title>
+    <title>Smart Stock | Controle Residencial</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f8f9fa;
+            --bg: #f4f7fa;
             --primary: #4361ee;
             --danger: #f72585;
             --success: #4caf50;
             --text: #2b2d42;
-            --card-bg: #ffffff;
+            --card: #ffffff;
         }
 
         body { 
@@ -30,138 +30,163 @@
             top: 0;
             z-index: 100;
             box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        h1 { margin: 0; font-size: 1.3rem; color: var(--primary); display: flex; justify-content: space-between; align-items: center; }
+        h1 { margin: 0; font-size: 1.2rem; color: var(--primary); font-weight: 800; }
 
         .container { padding: 15px; max-width: 500px; margin: auto; }
 
-        /* Filtros */
-        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
-        select { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: white; font-size: 0.9rem; }
+        /* Filtros e Busca */
+        .search-box { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; }
+        .controls { display: flex; gap: 8px; margin-bottom: 20px; }
+        select { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #eee; background: white; font-size: 0.85rem; cursor: pointer; }
 
         /* Cards */
         .card { 
-            background: var(--card-bg);
-            padding: 15px; 
-            border-radius: 15px; 
+            background: var(--card);
+            padding: 16px; 
+            border-radius: 16px; 
             margin-bottom: 12px; 
-            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
-            border: 1px solid #eee;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: transform 0.2s;
         }
 
-        .prod-info h3 { margin: 0 0 5px 0; font-size: 1rem; }
-        .prod-info span { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
+        .prod-info h3 { margin: 0 0 4px 0; font-size: 1.05rem; }
+        .prod-info span { font-size: 0.7rem; color: #999; text-transform: uppercase; font-weight: 700; }
 
-        .status-badge {
-            padding: 5px 10px;
+        .badge {
+            padding: 4px 10px;
             border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: bold;
+            font-size: 0.7rem;
+            font-weight: 800;
             float: right;
         }
 
-        .low { background: #ffe5ec; color: var(--danger); }
-        .ok { background: #e8f5e9; color: var(--success); }
+        .low { background: #ffe5ec; color: var(--danger); border: 1px solid #ffcadb; }
+        .ok { background: #e8f5e9; color: var(--success); border: 1px solid #c8e6c9; }
 
-        /* Inputs de Contagem */
-        .counter-group {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed #eee;
-        }
-        
-        .counter-group input {
-            width: 60px;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        /* Nav */
+        /* Navegação */
         nav { 
-            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
             width: 90%; max-width: 400px; background: #1a1a1a;
-            display: flex; border-radius: 20px; padding: 5px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex; border-radius: 24px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
         }
 
         nav button { 
-            flex: 1; border: none; background: none; color: #888; 
-            padding: 12px; font-size: 0.7rem; font-weight: bold; cursor: pointer;
+            flex: 1; border: none; background: none; color: #777; 
+            padding: 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer;
+            transition: 0.3s;
         }
 
-        nav button.active { color: white; background: var(--primary); border-radius: 15px; }
+        nav button.active { color: white; background: var(--primary); border-radius: 18px; }
 
-        .btn-add {
+        .btn-full {
             background: var(--primary); color: white; border: none;
-            width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1rem; margin-top: 10px;
+            width: 100%; padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer;
         }
 
-        .shopping-btn {
-            background: var(--danger); color: white; padding: 15px;
-            border-radius: 12px; text-align: center; margin-bottom: 20px;
-            font-weight: bold; cursor: pointer; display: none;
+        .shopping-alert {
+            background: var(--danger); color: white; padding: 16px;
+            border-radius: 14px; text-align: center; margin-bottom: 15px;
+            font-weight: 800; cursor: pointer; font-size: 0.9rem;
+            box-shadow: 0 6px 15px rgba(247, 37, 133, 0.3);
         }
 
         .hidden { display: none !important; }
+
+        /* Estilo Inventário */
+        .inv-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #eee; }
+        .inv-row input { width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; }
+        
+        .backup-section { margin-top: 40px; padding: 20px; text-align: center; background: #eee; border-radius: 15px; }
+        .btn-small { background: #888; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.7rem; margin: 5px; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Smart Stock <span>📦</span></h1>
+    <h1>Smart Stock 📦</h1>
+    <div id="item-count" style="font-size: 0.7rem; background: #f0f0f0; padding: 4px 8px; border-radius: 20px; font-weight: bold;">0 ITENS</div>
 </header>
 
 <div class="container">
     
     <section id="tela-inicio">
-        <div id="btn-whats" class="shopping-btn" onclick="enviarWhatsApp()">
-            🛒 Enviar Lista de Compras
+        <div id="btn-zap" class="shopping-alert hidden" onclick="enviarWhatsApp()">
+            🛒 GERAR LISTA DE COMPRAS (ZAP)
         </div>
 
+        <input type="text" id="busca" class="search-box" placeholder="Pesquisar produto..." oninput="renderHome()">
+
         <div class="controls">
-            <select id="f-cat" onchange="renderHome()">
+            <select id="f-categoria" onchange="renderHome()">
                 <option value="Todos">Todas Categorias</option>
                 <option>Alimentos</option>
                 <option>Limpeza</option>
                 <option>Higiene</option>
             </select>
             <select id="f-ordem" onchange="renderHome()">
-                <option value="az">A-Z</option>
-                <option value="falta">O que falta</option>
+                <option value="az">Nome A-Z</option>
+                <option value="falta">Prioridade (Falta)</option>
             </select>
         </div>
 
         <div id="lista-home"></div>
+
+        <div class="backup-section">
+            <p style="margin:0 0 10px 0; font-size: 0.8rem; font-weight: bold;">Sincronização entre Aparelhos</p>
+            <button class="btn-small" onclick="exportar()">Salvar Backup</button>
+            <button class="btn-small" onclick="document.getElementById('importInput').click()">Abrir Backup</button>
+            <input type="file" id="importInput" class="hidden" onchange="importar(event)">
+        </div>
     </section>
 
     <section id="tela-cadastro" class="hidden">
         <div class="card">
-            <h2 style="margin-top:0">Novo Produto</h2>
-            <input type="text" id="nome" placeholder="Nome (ex: Arroz)" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+            <h2 style="margin:0 0 20px 0; font-size: 1.2rem;">Novo Produto</h2>
+            <label style="font-size:0.7rem; font-weight:bold">NOME</label>
+            <input type="text" id="nome" class="search-box" placeholder="Ex: Arroz">
+            
             <div style="display:flex; gap:10px; margin-bottom:10px">
-                <input type="text" id="marca" placeholder="Marca" style="flex:1; width:50%">
-                <select id="categoria" style="flex:1">
-                    <option>Alimentos</option>
-                    <option>Limpeza</option>
-                    <option>Higiene</option>
-                </select>
+                <div style="flex:1">
+                    <label style="font-size:0.7rem; font-weight:bold">MARCA</label>
+                    <input type="text" id="marca" class="search-box" placeholder="Ex: Tio João">
+                </div>
+                <div style="flex:1">
+                    <label style="font-size:0.7rem; font-weight:bold">CATEGORIA</label>
+                    <select id="categoria" class="search-box" style="margin:0">
+                        <option>Alimentos</option>
+                        <option>Limpeza</option>
+                        <option>Higiene</option>
+                    </select>
+                </div>
             </div>
-            <input type="text" id="medida" placeholder="Medida (kg, un, L)" style="width:100%; margin-bottom:10px; box-sizing:border-box">
-            <div style="display:flex; gap:10px">
-                <input type="number" id="atual" placeholder="Qtd Atual" style="flex:1; width:50%">
-                <input type="number" id="ideal" placeholder="Qtd Ideal" style="flex:1; width:50%">
+
+            <label style="font-size:0.7rem; font-weight:bold">MEDIDA</label>
+            <input type="text" id="medida" class="search-box" placeholder="Ex: 5kg ou 1 Unidade">
+
+            <div style="display:flex; gap:10px; margin-bottom:20px">
+                <div style="flex:1">
+                    <label style="font-size:0.7rem; font-weight:bold">ESTOQUE ATUAL</label>
+                    <input type="number" id="atual" class="search-box" placeholder="0">
+                </div>
+                <div style="flex:1">
+                    <label style="font-size:0.7rem; font-weight:bold">ESTOQUE IDEAL</label>
+                    <input type="number" id="ideal" class="search-box" placeholder="5">
+                </div>
             </div>
-            <button class="btn-add" onclick="salvar()">Salvar no Estoque</button>
+
+            <button class="btn-full" onclick="salvar()">ADICIONAR AO ESTOQUE</button>
         </div>
     </section>
 
     <section id="tela-contagem" class="hidden">
-        <h2>Inventário Rápido</h2>
+        <h2 style="font-size: 1.2rem;">Conferência de Itens</h2>
         <div id="lista-inventario"></div>
     </section>
 </div>
@@ -173,20 +198,18 @@
 </nav>
 
 <script>
-    // 1. Carregamento inicial robusto
-    let produtos = JSON.parse(localStorage.getItem('db_estoque_v2')) || [];
+    let produtos = JSON.parse(localStorage.getItem('smartStock_v2')) || [];
 
     function salvarLocal() {
-        localStorage.setItem('db_estoque_v2', JSON.stringify(produtos));
+        localStorage.setItem('smartStock_v2', JSON.stringify(produtos));
+        document.getElementById('item-count').innerText = `${produtos.length} ITENS`;
     }
 
     function mudarTela(tela) {
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        
         document.getElementById('tela-' + tela).classList.remove('hidden');
         document.getElementById('btn-nav-' + tela).classList.add('active');
-
         if(tela === 'inicio') renderHome();
         if(tela === 'contagem') renderContagem();
     }
@@ -201,47 +224,40 @@
             atual: parseInt(document.getElementById('atual').value) || 0,
             ideal: parseInt(document.getElementById('ideal').value) || 0
         };
-
-        if(!p.nome) return alert("Por favor, digite o nome.");
-
+        if(!p.nome) return alert("O nome é obrigatório!");
         produtos.push(p);
         salvarLocal();
-        alert("Salvo!");
-        
-        // Limpa campos
         document.querySelectorAll('input').forEach(i => i.value = '');
         mudarTela('inicio');
     }
 
     function renderHome() {
         const container = document.getElementById('lista-home');
-        const filtroCat = document.getElementById('f-cat').value;
+        const busca = document.getElementById('busca').value.toLowerCase();
+        const filtroCat = document.getElementById('f-categoria').value;
         const ordem = document.getElementById('f-ordem').value;
         
-        let lista = [...produtos];
+        let filtrados = produtos.filter(p => {
+            const matchBusca = p.nome.toLowerCase().includes(busca) || p.marca.toLowerCase().includes(busca);
+            const matchCat = filtroCat === 'Todos' || p.categoria === filtroCat;
+            return matchBusca && matchCat;
+        });
 
-        if(filtroCat !== 'Todos') lista = lista.filter(p => p.categoria === filtroCat);
+        if(ordem === 'az') filtrados.sort((a,b) => a.nome.localeCompare(b.nome));
+        else filtrados.sort((a,b) => (a.atual - a.ideal) - (b.atual - b.ideal));
 
-        if(ordem === 'az') {
-            lista.sort((a,b) => a.nome.localeCompare(b.nome));
-        } else {
-            lista.sort((a,b) => (a.atual - a.ideal) - (b.atual - b.ideal));
-        }
-
-        // Mostrar botão Whats se houver falta
         const temFalta = produtos.some(p => p.atual < p.ideal);
-        document.getElementById('btn-whats').style.display = temFalta ? 'block' : 'none';
+        document.getElementById('btn-zap').classList.toggle('hidden', !temFalta);
 
-        container.innerHTML = lista.map(p => {
-            const status = p.atual < p.ideal ? 'low' : 'ok';
-            const textoStatus = p.atual < p.ideal ? `Faltam ${p.ideal - p.atual}` : 'OK';
+        container.innerHTML = filtrados.map(p => {
+            const isLow = p.atual < p.ideal;
             return `
                 <div class="card">
-                    <span class="status-badge ${status}">${textoStatus}</span>
+                    <span class="badge ${isLow ? 'low' : 'ok'}">${isLow ? 'COMPRAR' : 'OK'}</span>
                     <div class="prod-info">
-                        <span>${p.categoria}</span>
+                        <span>${p.categoria} | ${p.marca}</span>
                         <h3>${p.nome}</h3>
-                        <small>${p.marca} | ${p.medida}</small>
+                        <small>Estoque: <b>${p.atual}</b> de ${p.ideal} (${p.medida})</small>
                     </div>
                 </div>
             `;
@@ -250,32 +266,29 @@
 
     function renderContagem() {
         const container = document.getElementById('lista-inventario');
-        container.innerHTML = produtos.map(p => `
+        container.innerHTML = produtos.sort((a,b) => a.nome.localeCompare(b.nome)).map(p => `
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center">
                     <strong>${p.nome}</strong>
-                    <button onclick="remover(${p.id})" style="border:none; background:none; color:red">🗑️</button>
+                    <button onclick="remover(${p.id})" style="border:none; background:none; font-size:1.2rem; cursor:pointer">🗑️</button>
                 </div>
-                <div class="counter-group">
-                    <span>Estoque Atual:</span>
-                    <input type="number" value="${p.atual}" onchange="atualizarQtd(${p.id}, this.value)">
-                    <small style="color:#888">Meta: ${p.ideal}</small>
+                <div class="inv-row">
+                    <span>Qtd Atual:</span>
+                    <input type="number" value="${p.atual}" onchange="atualizar(${p.id}, this.value)">
+                    <span style="color:#888; font-size:0.8rem">Meta: ${p.ideal}</span>
                 </div>
             </div>
         `).join('');
     }
 
-    function atualizarQtd(id, novaQtd) {
-        const index = produtos.findIndex(p => p.id === id);
-        if(index !== -1) {
-            produtos[index].atual = parseInt(novaQtd) || 0;
-            salvarLocal();
-            // Feedback visual rápido sem resetar a tela
-        }
+    function atualizar(id, valor) {
+        const idx = produtos.findIndex(p => p.id === id);
+        produtos[idx].atual = parseInt(valor) || 0;
+        salvarLocal();
     }
 
     function remover(id) {
-        if(confirm("Excluir este produto permanentemente?")) {
+        if(confirm("Remover permanentemente?")) {
             produtos = produtos.filter(p => p.id !== id);
             salvarLocal();
             renderContagem();
@@ -283,15 +296,33 @@
     }
 
     function enviarWhatsApp() {
-        const faltantes = produtos.filter(p => p.atual < p.ideal);
-        let msg = "*🛒 LISTA DE COMPRAS*\n\n";
-        faltantes.forEach(p => {
-            msg += `• *${p.nome}* (${p.marca})\n  Comprar: *${p.ideal - p.atual} ${p.medida}*\n\n`;
-        });
+        const compras = produtos.filter(p => p.atual < p.ideal);
+        let msg = "*🛒 LISTA DE COMPRAS SMART STOCK*\n\n";
+        compras.forEach(p => msg += `• *${p.nome}* (${p.marca})\n  Faltam: *${p.ideal - p.atual} ${p.medida}*\n\n`);
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
     }
 
-    // Inicializa a primeira tela
+    function exportar() {
+        const blob = new Blob([JSON.stringify(produtos)], {type: "application/json"});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'estoque_reserva.json'; a.click();
+    }
+
+    function importar(e) {
+        const reader = new FileReader();
+        reader.onload = () => {
+            if(confirm("Importar dados? Isso substituirá o estoque atual.")){
+                produtos = JSON.parse(reader.result);
+                salvarLocal();
+                renderHome();
+            }
+        };
+        reader.readAsText(e.target.files[0]);
+    }
+
+    // Init
+    salvarLocal();
     renderHome();
 </script>
 
