@@ -3,27 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Stock Mobile</title>
+    <title>Smart Stock Pro</title>
     <style>
-        /* Estilos simplificados para máxima compatibilidade mobile */
         :root { --p: #4361ee; --d: #f72585; --s: #4caf50; --t: #2b2d42; --bg: #f4f7fa; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; color: var(--t); -webkit-tap-highlight-color: transparent; }
-        header { background: #fff; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; color: var(--t); }
+        header { background: #fff; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; position: sticky; top:0; z-index:10; }
         h1 { margin: 0; font-size: 1.2rem; color: var(--p); }
         .container { padding: 10px; max-width: 500px; margin: auto; }
-        .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; } /* 16px evita zoom automático no iPhone */
-        .btn { background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; }
+        .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; position: relative; }
+        .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
+        .btn { background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; }
         .btn-zap { background: var(--d); margin-bottom: 15px; }
         .low-stock { border-left: 5px solid var(--d); }
         .badge { float: right; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; }
         .bg-low { background: #ffe5ec; color: var(--d); }
         .bg-ok { background: #e8f5e9; color: var(--s); }
-        nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; }
-        nav button { background: none; border: none; color: #888; font-size: 0.7rem; font-weight: bold; }
+        nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1000; }
+        nav button { background: none; border: none; color: #888; font-size: 0.7rem; font-weight: bold; cursor: pointer; }
         nav button.active { color: #fff; }
         .hidden { display: none !important; }
-        .cat-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
+        .backup-btn { background: #eee; color: #666; font-size: 0.6rem; padding: 5px; border: 1px solid #ccc; margin-top: 20px; border-radius: 5px; width: 100%; }
     </style>
 </head>
 <body>
@@ -32,161 +31,5 @@
 
 <div class="container">
     <section id="t-inicio">
-        <button id="btn-zap" class="btn btn-zap hidden" onclick="enviarZap()">🛒 ENVIAR LISTA (WHATSAPP)</button>
-        <input type="text" id="busca" class="input" placeholder="Buscar produto..." oninput="renderHome()">
-        <div id="lista-home"></div>
-    </section>
-
-    <section id="t-cadastro" class="hidden">
-        <div class="card">
-            <h3>Novo Produto</h3>
-            <input type="text" id="p-nome" class="input" placeholder="Nome">
-            <input type="text" id="p-marca" class="input" placeholder="Marca">
-            <select id="p-cat" class="input"></select>
-            <input type="text" id="p-medida" class="input" placeholder="Medida (kg, un)">
-            <input type="number" id="p-atual" class="input" placeholder="Qtd Atual">
-            <input type="number" id="p-ideal" class="input" placeholder="Meta Ideal">
-            <button class="btn" onclick="salvar()">SALVAR NO ESTOQUE</button>
-        </div>
-    </section>
-
-    <section id="t-estoque" class="hidden">
-        <div id="lista-estoque"></div>
-    </section>
-
-    <section id="t-config" class="hidden">
-        <div class="card">
-            <h3>Categorias</h3>
-            <div style="display:flex; gap:5px;">
-                <input type="text" id="new-cat" class="input" placeholder="Nova...">
-                <button onclick="addCat()" style="height:44px; padding:0 15px;">+</button>
-            </div>
-            <div id="lista-cats"></div>
-        </div>
-    </section>
-</div>
-
-<nav>
-    <button onclick="mudar('inicio')" id="b-inicio" class="active">INÍCIO</button>
-    <button onclick="mudar('cadastro')" id="b-cadastro">NOVO</button>
-    <button onclick="mudar('estoque')" id="b-estoque">ESTOQUE</button>
-    <button onclick="mudar('config')" id="b-config">CAT.</button>
-</nav>
-
-<script>
-    let prods = JSON.parse(localStorage.getItem('ss_p')) || [];
-    let cats = JSON.parse(localStorage.getItem('ss_c')) || ["Alimentos", "Limpeza", "Higiene"];
-
-    function persistir() {
-        localStorage.setItem('ss_p', JSON.stringify(prods));
-        localStorage.setItem('ss_c', JSON.stringify(cats));
-        atualizarSelects();
-    }
-
-    function atualizarSelects() {
-        let h = "";
-        cats.sort().forEach(c => h += '<option value="'+c+'">'+c+'</option>');
-        document.getElementById('p-cat').innerHTML = h;
-    }
-
-    function mudar(tela) {
-        document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
-        document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-        document.getElementById('t-' + tela).classList.remove('hidden');
-        document.getElementById('b-' + tela).classList.add('active');
-        if(tela === 'inicio') renderHome();
-        if(tela === 'estoque') renderEstoque();
-        if(tela === 'config') renderCats();
-    }
-
-    function salvar() {
-        let p = {
-            id: Date.now(),
-            n: document.getElementById('p-nome').value,
-            m: document.getElementById('p-marca').value,
-            c: document.getElementById('p-cat').value,
-            u: document.getElementById('p-medida').value || 'un',
-            a: parseInt(document.getElementById('p-atual').value) || 0,
-            i: parseInt(document.getElementById('p-ideal').value) || 0
-        };
-        if(!p.n) return alert("Nome vazio!");
-        prods.push(p);
-        persistir();
-        alert("Salvo!");
-        document.querySelectorAll('input').forEach(i => i.value = '');
-        mudar('inicio');
-    }
-
-    function renderHome() {
-        let container = document.getElementById('lista-home');
-        let busca = document.getElementById('busca').value.toLowerCase();
-        let html = "";
-        let temFalta = false;
-
-        prods.forEach(p => {
-            if(p.n.toLowerCase().includes(busca)) {
-                let falta = p.i - p.a;
-                let low = falta > 0;
-                if(low) temFalta = true;
-                html += '<div class="card ' + (low ? 'low-stock' : '') + '">' +
-                        '<span class="badge ' + (low ? 'bg-low' : 'bg-ok') + '">' + (low ? 'FALTA' : 'OK') + '</span>' +
-                        '<strong>' + p.n + '</strong><br><small>' + p.m + '</small><br>' +
-                        (low ? '<b style="color:red">Faltam: ' + falta + ' ' + p.u + '</b>' : 'Estoque OK') +
-                        '</div>';
-            }
-        });
-        document.getElementById('btn-zap').classList.toggle('hidden', !temFalta);
-        container.innerHTML = html || "<p style='text-align:center'>Vazio</p>";
-    }
-
-    function renderEstoque() {
-        let h = "";
-        prods.sort((a,b) => a.n.localeCompare(b.n)).forEach(p => {
-            h += '<div class="card"><strong>' + p.n + '</strong>' +
-                 '<button onclick="deleteP('+p.id+')" style="float:right; border:none; background:none; color:red">Excluir</button>' +
-                 '<div style="margin-top:10px">Atual: <input type="number" value="'+p.a+'" onchange="atu('+p.id+', this.value)" style="width:60px"> Meta: '+p.i+'</div></div>';
-        });
-        document.getElementById('lista-estoque').innerHTML = h;
-    }
-
-    function atu(id, v) {
-        let i = prods.findIndex(x => x.id === id);
-        prods[i].a = parseInt(v) || 0;
-        persistir();
-    }
-
-    function deleteP(id) {
-        if(confirm("Excluir?")) {
-            prods = prods.filter(x => x.id !== id);
-            persistir();
-            renderEstoque();
-        }
-    }
-
-    function addCat() {
-        let n = document.getElementById('new-cat').value;
-        if(n) { cats.push(n); persistir(); renderCats(); document.getElementById('new-cat').value = ""; }
-    }
-
-    function renderCats() {
-        let h = "";
-        cats.forEach(c => h += '<div class="cat-item"><span>'+c+'</span><button onclick="delCat(\''+c+'\')" style="color:red; border:none; background:none">X</button></div>');
-        document.getElementById('lista-cats').innerHTML = h;
-    }
-
-    function delCat(n) {
-        if(prods.some(p => p.c === n)) return alert("Em uso!");
-        cats = cats.filter(c => c !== n); persistir(); renderCats();
-    }
-
-    function enviarZap() {
-        let m = "*LISTA DE COMPRAS*\n\n";
-        prods.forEach(p => { if(p.i > p.a) m += "• " + p.n + ": Faltam " + (p.i - p.a) + " " + p.u + "\n"; });
-        window.open("https://wa.me/?text=" + encodeURIComponent(m));
-    }
-
-    persistir();
-    renderHome();
-</script>
-</body>
-</html>
+        <button id="btn-zap" class="btn btn-zap hidden" onclick="enviarZap()">🛒 ENVIAR LISTA PARA WHATSAPP</button>
+        <input type="text" id="busca" class="input
