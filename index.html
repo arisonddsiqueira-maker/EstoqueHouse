@@ -3,26 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Smart Stock Mobile</title>
+    <title>Smart Stock</title>
     <style>
-        :root { --p: #4361ee; --d: #f72585; --s: #4caf50; --t: #2b2d42; --bg: #f4f7fa; }
-        body { font-family: sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; color: var(--t); -webkit-tap-highlight-color: transparent; }
-        header { background: #fff; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; position: sticky; top: 0; z-index: 10; }
-        h1 { margin: 0; font-size: 1.2rem; color: var(--p); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: sans-serif; background: #f4f7fa; margin: 0; padding-bottom: 100px; color: #2b2d42; }
+        header { background: #fff; padding: 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: center; position: sticky; top: 0; z-index: 1001; }
+        h1 { margin: 0; font-size: 1.2rem; color: #4361ee; }
         .container { padding: 10px; max-width: 500px; margin: auto; }
+        
+        /* Botão WhatsApp - Estilo Reforçado */
+        .btn-zap { 
+            background: #f72585; color: #fff; border: none; padding: 15px; 
+            border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; 
+            font-size: 1rem; margin-bottom: 15px; display: none; 
+            box-shadow: 0 4px 10px rgba(247, 37, 133, 0.3);
+        }
+
         .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
-        .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 16px; }
-        .btn { background: var(--p); color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; font-size: 1rem; }
-        .btn-zap { background: var(--d); margin-bottom: 15px; display: block; text-align: center; text-decoration: none; }
-        .low-stock { border-left: 5px solid var(--d); }
-        .badge { float: right; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; }
-        .bg-low { background: #ffe5ec; color: var(--d); }
-        .bg-ok { background: #e8f5e9; color: var(--s); }
-        nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; }
-        nav button { background: none; border: none; color: #888; font-size: 0.7rem; font-weight: bold; padding: 10px; }
+        .input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; background: #fff; }
+        .btn-blue { background: #4361ee; color: #fff; border: none; padding: 15px; border-radius: 10px; width: 100%; font-weight: bold; }
+        
+        .low-stock { border-left: 5px solid #f72585; }
+        .badge { float: right; padding: 3px 8px; border-radius: 5px; font-size: 0.7rem; font-weight: bold; background: #eee; }
+        .bg-low { background: #ffe5ec; color: #f72585; }
+        .bg-ok { background: #e8f5e9; color: #4caf50; }
+
+        nav { position: fixed; bottom: 0; width: 100%; background: #1a1a1a; display: flex; justify-content: space-around; padding: 12px 0; z-index: 1002; }
+        nav button { background: none; border: none; color: #888; font-size: 0.7rem; font-weight: bold; padding: 10px; cursor: pointer; }
         nav button.active { color: #fff; border-bottom: 2px solid #fff; }
+        
         .hidden { display: none !important; }
-        .cat-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -31,15 +41,14 @@
 
 <div class="container">
     <section id="t-inicio">
-        <button id="btn-zap" class="btn btn-zap hidden" onclick="enviarZap()">🛒 ENVIAR LISTA (WHATSAPP)</button>
+        <button id="btn-whatsapp" class="btn-zap" onclick="enviarZap()">🛒 ENVIAR LISTA (WHATSAPP)</button>
         
         <div style="display: flex; gap: 5px;">
-            <input type="text" id="busca" class="input" placeholder="Buscar..." oninput="renderHome()" style="flex: 2;">
-            <select id="filtro-cat" class="input" onchange="renderHome()" style="flex: 1; font-size: 12px;"></select>
+            <input type="text" id="busca" class="input" placeholder="Pesquisar..." oninput="renderHome()">
+            <select id="filtro-cat" class="input" onchange="renderHome()" style="flex: 1;"></select>
         </div>
 
-        <div id="lista-home">
-            </div>
+        <div id="lista-home"></div>
     </section>
 
     <section id="t-cadastro" class="hidden">
@@ -51,7 +60,7 @@
             <input type="text" id="p-medida" class="input" placeholder="Medida (kg, un, l)">
             <input type="number" id="p-atual" class="input" placeholder="Qtd Atual">
             <input type="number" id="p-ideal" class="input" placeholder="Meta Ideal">
-            <button class="btn" onclick="salvar()">SALVAR NO ESTOQUE</button>
+            <button class="btn-blue" onclick="salvar()">SALVAR NO ESTOQUE</button>
         </div>
     </section>
 
@@ -63,10 +72,10 @@
         <div class="card">
             <h3>Categorias</h3>
             <div style="display:flex; gap:5px;">
-                <input type="text" id="new-cat" class="input" placeholder="Nova...">
-                <button onclick="addCat()" style="height:44px; padding:0 15px; border-radius: 8px; border: none; background: var(--s); color: white;">+</button>
+                <input type="text" id="new-cat" class="input" placeholder="Nova..." style="margin:0">
+                <button onclick="addCat()" style="padding:0 15px; border-radius:8px; border:none; background:#4caf50; color:#fff; font-weight:bold;">+</button>
             </div>
-            <div id="lista-cats"></div>
+            <div id="lista-cats" style="margin-top:15px;"></div>
         </div>
     </section>
 </div>
@@ -75,10 +84,11 @@
     <button onclick="mudar('inicio')" id="b-inicio" class="active">INÍCIO</button>
     <button onclick="mudar('cadastro')" id="b-cadastro">NOVO</button>
     <button onclick="mudar('estoque')" id="b-estoque">ESTOQUE</button>
-    <button onclick="mudar('config')" id="b-config">CONFIG</button>
+    <button onclick="mudar('config')" id="b-config">CAT.</button>
 </nav>
 
 <script>
+    // Garantindo as chaves corretas
     var prods = JSON.parse(localStorage.getItem('ss_p')) || [];
     var cats = JSON.parse(localStorage.getItem('ss_c')) || ["Alimentos", "Limpeza", "Higiene"];
 
@@ -90,7 +100,7 @@
 
     function atualizarSelects() {
         var h = "";
-        var f = '<option value="Todos">Categorias</option>';
+        var f = '<option value="Todos">Todas</option>';
         cats.sort().forEach(function(c) {
             h += '<option value="'+c+'">'+c+'</option>';
             f += '<option value="'+c+'">'+c+'</option>';
@@ -100,13 +110,19 @@
     }
 
     function mudar(tela) {
-        document.querySelectorAll('section').forEach(function(s) { s.classList.add('hidden'); });
-        document.querySelectorAll('nav button').forEach(function(b) { b.classList.remove('active'); });
+        document.getElementById('t-inicio').classList.add('hidden');
+        document.getElementById('t-cadastro').classList.add('hidden');
+        document.getElementById('t-estoque').classList.add('hidden');
+        document.getElementById('t-config').classList.add('hidden');
         
+        document.getElementById('b-inicio').classList.remove('active');
+        document.getElementById('b-cadastro').classList.remove('active');
+        document.getElementById('b-estoque').classList.remove('active');
+        document.getElementById('b-config').classList.remove('active');
+
         document.getElementById('t-' + tela).classList.remove('hidden');
         document.getElementById('b-' + tela).classList.add('active');
-        
-        // Sempre que mudar para o início ou estoque, forçamos a renderização
+
         if(tela === 'inicio') renderHome();
         if(tela === 'estoque') renderEstoque();
         if(tela === 'config') renderCats();
@@ -114,9 +130,9 @@
 
     function salvar() {
         var n = document.getElementById('p-nome').value;
-        if(!n) { alert("Nome vazio!"); return; }
+        if(!n) { alert("Nome é obrigatório!"); return; }
         
-        prods.push({
+        var p = {
             id: Date.now(),
             n: n,
             m: document.getElementById('p-marca').value,
@@ -124,10 +140,14 @@
             u: document.getElementById('p-medida').value || 'un',
             a: parseInt(document.getElementById('p-atual').value) || 0,
             i: parseInt(document.getElementById('p-ideal').value) || 0
-        });
+        };
+        prods.push(p);
         persistir();
-        alert("Salvo!");
-        document.querySelectorAll('#t-cadastro input').forEach(function(i) { i.value = ''; });
+        alert("Produto salvo!");
+        document.getElementById('p-nome').value = "";
+        document.getElementById('p-marca').value = "";
+        document.getElementById('p-atual').value = "";
+        document.getElementById('p-ideal').value = "";
         mudar('inicio');
     }
 
@@ -138,107 +158,97 @@
         var html = "";
         var temFalta = false;
 
-        // Limpa a lista antes de começar
-        container.innerHTML = "";
-
-        prods.sort(function(a,b) { return a.n.localeCompare(b.n); }).forEach(function(p) {
-            var matchBusca = p.n.toLowerCase().indexOf(busca) > -1 || p.m.toLowerCase().indexOf(busca) > -1;
+        for (var i = 0; i < prods.length; i++) {
+            var p = prods[i];
+            var matchBusca = p.n.toLowerCase().indexOf(busca) !== -1 || p.m.toLowerCase().indexOf(busca) !== -1;
             var matchCat = filtro === "Todos" || p.c === filtro;
 
-            if(matchBusca && matchCat) {
+            if (matchBusca && matchCat) {
                 var falta = p.i - p.a;
                 var low = falta > 0;
-                if(low) temFalta = true;
+                if (low) temFalta = true;
 
                 html += '<div class="card ' + (low ? 'low-stock' : '') + '">' +
                         '<span class="badge ' + (low ? 'bg-low' : 'bg-ok') + '">' + (low ? 'FALTA' : 'OK') + '</span>' +
                         '<strong>' + p.n + '</strong><br><small>' + p.m + ' ('+p.c+')</small><br>' +
-                        (low ? '<b style="color:var(--d); display:block; margin-top:5px;">Faltam: ' + falta + ' ' + p.u + '</b>' : '<span style="color:var(--s); display:block; margin-top:5px;">Estoque OK</span>') +
+                        (low ? '<b style="color:#f72585; display:block; margin-top:5px;">Faltam: ' + falta + ' ' + p.u + '</b>' : '<span style="color:#4caf50; display:block; margin-top:5px;">Estoque OK</span>') +
                         '<small style="color:#999">Ideal: '+p.i+' | Atual: '+p.a+'</small></div>';
             }
-        });
-
-        // Controle do botão do WhatsApp
-        var btnZap = document.getElementById('btn-zap');
-        if(temFalta) {
-            btnZap.classList.remove('hidden');
-        } else {
-            btnZap.classList.add('hidden');
         }
 
-        container.innerHTML = html || "<p style='text-align:center; color:#999; padding-top:20px;'>Nenhum item para exibir.</p>";
+        var btnZap = document.getElementById('btn-whatsapp');
+        btnZap.style.display = temFalta ? "block" : "none";
+        container.innerHTML = html || "<p style='text-align:center; color:#999;'>Nenhum item encontrado.</p>";
     }
 
     function renderEstoque() {
         var h = "";
-        prods.sort(function(a,b) { return a.n.localeCompare(b.n); }).forEach(function(p) {
+        var ordenados = prods.slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
+        for (var i = 0; i < ordenados.length; i++) {
+            var p = ordenados[i];
             h += '<div class="card"><strong>' + p.n + '</strong>' +
                  '<button onclick="deleteP('+p.id+')" style="float:right; border:none; background:none; color:red; font-weight:bold;">🗑️</button>' +
                  '<div style="margin-top:10px; display:flex; align-items:center; gap:10px;">' +
-                 'Qtd: <input type="number" value="'+p.a+'" onchange="atu('+p.id+', this.value)" style="width:65px; padding:5px; border:1px solid #ddd; border-radius:5px;">' +
+                 'Qtd: <input type="number" value="'+p.a+'" onchange="atu('+p.id+', this.value)" style="width:65px; padding:5px; border:1px solid #ddd; border-radius:8px;">' +
                  '<small style="color:#888">Meta: '+p.i+' '+p.u+'</small></div></div>';
-        });
-        document.getElementById('lista-estoque').innerHTML = h || "<p style='text-align:center'>Lista vazia.</p>";
+        }
+        document.getElementById('lista-estoque').innerHTML = h || "<p style='text-align:center'>Estoque vazio.</p>";
     }
 
     function atu(id, v) {
-        var idx = prods.findIndex(function(x) { return x.id === id; });
-        if(idx > -1) {
-            prods[idx].a = parseInt(v) || 0;
-            persistir();
+        for (var i = 0; i < prods.length; i++) {
+            if (prods[i].id === id) {
+                prods[i].a = parseInt(v) || 0;
+                persistir();
+                break;
+            }
         }
     }
 
     function deleteP(id) {
-        if(confirm("Excluir?")) { 
-            prods = prods.filter(function(x) { return x.id !== id; }); 
-            persistir(); 
-            renderEstoque(); 
+        if(confirm("Excluir este item?")) {
+            prods = prods.filter(function(x) { return x.id !== id; });
+            persistir();
+            renderEstoque();
         }
     }
 
     function addCat() {
         var n = document.getElementById('new-cat').value;
-        if(n && cats.indexOf(n) === -1) { 
-            cats.push(n); 
-            persistir(); 
-            renderCats(); 
-            document.getElementById('new-cat').value = ""; 
+        if(n && cats.indexOf(n) === -1) {
+            cats.push(n);
+            persistir();
+            renderCats();
+            document.getElementById('new-cat').value = "";
         }
     }
 
     function renderCats() {
         var h = "";
-        cats.sort().forEach(function(c) { 
-            h += '<div class="cat-item"><span>'+c+'</span><button onclick="delCat(\''+c+'\')" style="color:red; border:none; background:none; font-weight:bold;">X</button></div>'; 
-        });
+        for (var i = 0; i < cats.length; i++) {
+            h += '<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>'+cats[i]+'</span><button onclick="delCat(\''+cats[i]+'\')" style="color:red; border:none; background:none; font-weight:bold;">X</button></div>';
+        }
         document.getElementById('lista-cats').innerHTML = h;
     }
 
     function delCat(n) {
-        if(prods.some(function(p) { return p.c === n; })) { 
-            alert("Categoria em uso!"); 
-            return; 
-        }
-        cats = cats.filter(function(c) { return c !== n; }); 
-        persistir(); 
+        if(prods.some(function(p){ return p.c === n; })) { alert("Categoria em uso!"); return; }
+        cats = cats.filter(function(c){ return c !== n; });
+        persistir();
         renderCats();
     }
 
     function enviarZap() {
         var m = "*🛒 MINHA LISTA DE COMPRAS*\n\n";
-        var itensFaltantes = false;
-        prods.forEach(function(p) { 
-            if(p.i > p.a) { 
-                m += "• *" + p.n + "*: Faltam " + (p.i - p.a) + " " + p.u + "\n"; 
-                itensFaltantes = true;
-            } 
-        });
-        if(itensFaltantes) {
-            window.open("https://wa.me/?text=" + encodeURIComponent(m));
-        } else {
-            alert("Nada faltando no momento!");
+        var algum = false;
+        for (var i = 0; i < prods.length; i++) {
+            var p = prods[i];
+            if (p.i > p.a) {
+                m += "• *" + p.n + "*: Faltam " + (p.i - p.a) + " " + p.u + "\n";
+                algum = true;
+            }
         }
+        if (algum) window.open("https://wa.me/?text=" + encodeURIComponent(m));
     }
 
     // Inicialização
