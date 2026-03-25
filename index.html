@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Stock | Controle Residencial</title>
+    <title>Smart Stock | Gestão Total</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -15,96 +15,32 @@
             --card: #ffffff;
         }
 
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background: var(--bg);
-            margin: 0; 
-            padding-bottom: 100px;
-            color: var(--text);
-        }
-
-        header { 
-            padding: 20px; 
-            background: white;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background: var(--bg); margin: 0; padding-bottom: 100px; color: var(--text); }
+        header { padding: 20px; background: white; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; }
         h1 { margin: 0; font-size: 1.2rem; color: var(--primary); font-weight: 800; }
-
         .container { padding: 15px; max-width: 500px; margin: auto; }
 
-        /* Filtros e Busca */
         .search-box { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 10px; box-sizing: border-box; font-size: 1rem; }
         .controls { display: flex; gap: 8px; margin-bottom: 20px; }
         select { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid #eee; background: white; font-size: 0.85rem; cursor: pointer; }
 
-        /* Cards */
-        .card { 
-            background: var(--card);
-            padding: 16px; 
-            border-radius: 16px; 
-            margin-bottom: 12px; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-            border: 1px solid rgba(0,0,0,0.02);
-            transition: transform 0.2s;
-        }
-
+        .card { background: var(--card); padding: 16px; border-radius: 16px; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.02); }
         .prod-info h3 { margin: 0 0 4px 0; font-size: 1.05rem; }
         .prod-info span { font-size: 0.7rem; color: #999; text-transform: uppercase; font-weight: 700; }
+        
+        .badge { padding: 4px 10px; border-radius: 8px; font-size: 0.7rem; font-weight: 800; float: right; }
+        .low { background: #ffe5ec; color: var(--danger); }
+        .ok { background: #e8f5e9; color: var(--success); }
 
-        .badge {
-            padding: 4px 10px;
-            border-radius: 8px;
-            font-size: 0.7rem;
-            font-weight: 800;
-            float: right;
-        }
-
-        .low { background: #ffe5ec; color: var(--danger); border: 1px solid #ffcadb; }
-        .ok { background: #e8f5e9; color: var(--success); border: 1px solid #c8e6c9; }
-
-        /* Navegação */
-        nav { 
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 90%; max-width: 400px; background: #1a1a1a;
-            display: flex; border-radius: 24px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            z-index: 1000;
-        }
-
-        nav button { 
-            flex: 1; border: none; background: none; color: #777; 
-            padding: 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer;
-            transition: 0.3s;
-        }
-
+        nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); width: 95%; max-width: 450px; background: #1a1a1a; display: flex; border-radius: 24px; padding: 6px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 1000; }
+        nav button { flex: 1; border: none; background: none; color: #777; padding: 10px 5px; font-size: 0.65rem; font-weight: bold; cursor: pointer; }
         nav button.active { color: white; background: var(--primary); border-radius: 18px; }
 
-        .btn-full {
-            background: var(--primary); color: white; border: none;
-            width: 100%; padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer;
-        }
-
-        .shopping-alert {
-            background: var(--danger); color: white; padding: 16px;
-            border-radius: 14px; text-align: center; margin-bottom: 15px;
-            font-weight: 800; cursor: pointer; font-size: 0.9rem;
-            box-shadow: 0 6px 15px rgba(247, 37, 133, 0.3);
-        }
-
-        .hidden { display: none !important; }
-
-        /* Estilo Inventário */
-        .inv-row { display: flex; align-items: center; gap: 10px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #eee; }
-        .inv-row input { width: 60px; padding: 8px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-weight: bold; }
+        .btn-full { background: var(--primary); color: white; border: none; width: 100%; padding: 16px; border-radius: 14px; font-weight: 800; cursor: pointer; margin-top: 10px; }
+        .shopping-alert { background: var(--danger); color: white; padding: 16px; border-radius: 14px; text-align: center; margin-bottom: 15px; font-weight: 800; cursor: pointer; font-size: 0.9rem; }
         
-        .backup-section { margin-top: 40px; padding: 20px; text-align: center; background: #eee; border-radius: 15px; }
-        .btn-small { background: #888; color: white; border: none; padding: 8px 12px; border-radius: 8px; font-size: 0.7rem; margin: 5px; cursor: pointer; }
+        .item-list { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
@@ -117,92 +53,76 @@
 <div class="container">
     
     <section id="tela-inicio">
-        <div id="btn-zap" class="shopping-alert hidden" onclick="enviarWhatsApp()">
-            🛒 GERAR LISTA DE COMPRAS (ZAP)
-        </div>
-
-        <input type="text" id="busca" class="search-box" placeholder="Pesquisar produto..." oninput="renderHome()">
-
+        <div id="btn-zap" class="shopping-alert hidden" onclick="enviarWhatsApp()">🛒 LISTA DE COMPRAS (ZAP)</div>
+        <input type="text" id="busca" class="search-box" placeholder="Pesquisar..." oninput="renderHome()">
         <div class="controls">
-            <select id="f-categoria" onchange="renderHome()">
-                <option value="Todos">Todas Categorias</option>
-                <option>Alimentos</option>
-                <option>Limpeza</option>
-                <option>Higiene</option>
-            </select>
+            <select id="f-categoria" onchange="renderHome()"></select>
             <select id="f-ordem" onchange="renderHome()">
                 <option value="az">Nome A-Z</option>
-                <option value="falta">Prioridade (Falta)</option>
+                <option value="falta">Faltantes primeiro</option>
             </select>
         </div>
-
         <div id="lista-home"></div>
-
-        <div class="backup-section">
-            <p style="margin:0 0 10px 0; font-size: 0.8rem; font-weight: bold;">Sincronização entre Aparelhos</p>
-            <button class="btn-small" onclick="exportar()">Salvar Backup</button>
-            <button class="btn-small" onclick="document.getElementById('importInput').click()">Abrir Backup</button>
-            <input type="file" id="importInput" class="hidden" onchange="importar(event)">
-        </div>
     </section>
 
     <section id="tela-cadastro" class="hidden">
         <div class="card">
-            <h2 style="margin:0 0 20px 0; font-size: 1.2rem;">Novo Produto</h2>
-            <label style="font-size:0.7rem; font-weight:bold">NOME</label>
-            <input type="text" id="nome" class="search-box" placeholder="Ex: Arroz">
-            
-            <div style="display:flex; gap:10px; margin-bottom:10px">
-                <div style="flex:1">
-                    <label style="font-size:0.7rem; font-weight:bold">MARCA</label>
-                    <input type="text" id="marca" class="search-box" placeholder="Ex: Tio João">
-                </div>
-                <div style="flex:1">
-                    <label style="font-size:0.7rem; font-weight:bold">CATEGORIA</label>
-                    <select id="categoria" class="search-box" style="margin:0">
-                        <option>Alimentos</option>
-                        <option>Limpeza</option>
-                        <option>Higiene</option>
-                    </select>
-                </div>
+            <h2 style="margin:0 0 15px 0; font-size: 1.1rem;">Novo Produto</h2>
+            <input type="text" id="nome" class="search-box" placeholder="Nome do Produto">
+            <input type="text" id="marca" class="search-box" placeholder="Marca">
+            <select id="p-categoria-select" class="search-box"></select>
+            <input type="text" id="medida" class="search-box" placeholder="Medida (Ex: 5kg, 1 Un)">
+            <div style="display:flex; gap:10px;">
+                <input type="number" id="atual" class="search-box" placeholder="Qtd Atual">
+                <input type="number" id="ideal" class="search-box" placeholder="Meta">
             </div>
+            <button class="btn-full" onclick="salvarProduto()">SALVAR PRODUTO</button>
+        </div>
+    </section>
 
-            <label style="font-size:0.7rem; font-weight:bold">MEDIDA</label>
-            <input type="text" id="medida" class="search-box" placeholder="Ex: 5kg ou 1 Unidade">
-
-            <div style="display:flex; gap:10px; margin-bottom:20px">
-                <div style="flex:1">
-                    <label style="font-size:0.7rem; font-weight:bold">ESTOQUE ATUAL</label>
-                    <input type="number" id="atual" class="search-box" placeholder="0">
-                </div>
-                <div style="flex:1">
-                    <label style="font-size:0.7rem; font-weight:bold">ESTOQUE IDEAL</label>
-                    <input type="number" id="ideal" class="search-box" placeholder="5">
-                </div>
+    <section id="tela-config" class="hidden">
+        <div class="card">
+            <h2 style="margin:0 0 15px 0; font-size: 1.1rem;">Gerenciar Categorias</h2>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="nova-cat-nome" class="search-box" placeholder="Nova Categoria..." style="margin:0">
+                <button onclick="adicionarCategoria()" style="background:var(--success); color:white; border:none; border-radius:12px; padding:0 20px; font-weight:bold; cursor:pointer">+</button>
             </div>
-
-            <button class="btn-full" onclick="salvar()">ADICIONAR AO ESTOQUE</button>
+            <div id="lista-categorias-gestao" style="margin-top:20px;"></div>
         </div>
     </section>
 
     <section id="tela-contagem" class="hidden">
-        <h2 style="font-size: 1.2rem;">Conferência de Itens</h2>
+        <h2 style="font-size: 1.1rem;">Inventário</h2>
         <div id="lista-inventario"></div>
     </section>
 </div>
 
 <nav>
-    <button onclick="mudarTela('inicio')" id="btn-nav-inicio" class="active">INÍCIO</button>
-    <button onclick="mudarTela('cadastro')" id="btn-nav-cadastro">CADASTRAR</button>
-    <button onclick="mudarTela('contagem')" id="btn-nav-contagem">ESTOQUE</button>
+    <button onclick="mudarTela('inicio')" id="btn-nav-inicio" class="active">🏠 INÍCIO</button>
+    <button onclick="mudarTela('cadastro')" id="btn-nav-cadastro">➕ NOVO</button>
+    <button onclick="mudarTela('contagem')" id="btn-nav-contagem">📋 ESTOQUE</button>
+    <button onclick="mudarTela('config')" id="btn-nav-config">⚙️ CAT.</button>
 </nav>
 
 <script>
-    let produtos = JSON.parse(localStorage.getItem('smartStock_v2')) || [];
+    // Inicia com categorias padrão se estiver vazio
+    let produtos = JSON.parse(localStorage.getItem('smartStock_prod')) || [];
+    let categorias = JSON.parse(localStorage.getItem('smartStock_cat')) || ["Alimentos", "Limpeza", "Higiene", "Outros"];
 
-    function salvarLocal() {
-        localStorage.setItem('smartStock_v2', JSON.stringify(produtos));
+    function salvarTudo() {
+        localStorage.setItem('smartStock_prod', JSON.stringify(produtos));
+        localStorage.setItem('smartStock_cat', JSON.stringify(categorias));
         document.getElementById('item-count').innerText = `${produtos.length} ITENS`;
+        atualizarSelects();
+    }
+
+    function atualizarSelects() {
+        const selects = [document.getElementById('f-categoria'), document.getElementById('p-categoria-select')];
+        selects.forEach((sel, index) => {
+            let html = index === 0 ? '<option value="Todos">Todas Categorias</option>' : '';
+            categorias.sort().forEach(c => html += `<option value="${c}">${c}</option>`);
+            sel.innerHTML = html;
+        });
     }
 
     function mudarTela(tela) {
@@ -212,22 +132,55 @@
         document.getElementById('btn-nav-' + tela).classList.add('active');
         if(tela === 'inicio') renderHome();
         if(tela === 'contagem') renderContagem();
+        if(tela === 'config') renderCategorias();
     }
 
-    function salvar() {
+    // --- LOGICA CATEGORIAS ---
+    function adicionarCategoria() {
+        const nome = document.getElementById('nova-cat-nome').value.trim();
+        if(!nome) return;
+        if(categorias.includes(nome)) return alert("Categoria já existe!");
+        categorias.push(nome);
+        document.getElementById('nova-cat-nome').value = '';
+        salvarTudo();
+        renderCategorias();
+    }
+
+    function removerCategoria(nome) {
+        const emUso = produtos.some(p => p.categoria === nome);
+        if(emUso) return alert("Não é possível excluir: existem produtos nesta categoria!");
+        if(confirm(`Excluir categoria "${nome}"?`)) {
+            categorias = categorias.filter(c => c !== nome);
+            salvarTudo();
+            renderCategorias();
+        }
+    }
+
+    function renderCategorias() {
+        const container = document.getElementById('lista-categorias-gestao');
+        container.innerHTML = categorias.sort().map(c => `
+            <div class="item-list">
+                <span>${c}</span>
+                <button onclick="removerCategoria('${c}')" style="border:none; background:none; color:red; cursor:pointer">🗑️</button>
+            </div>
+        `).join('');
+    }
+
+    // --- LOGICA PRODUTOS ---
+    function salvarProduto() {
         const p = {
             id: Date.now(),
             nome: document.getElementById('nome').value,
             marca: document.getElementById('marca').value,
-            categoria: document.getElementById('categoria').value,
+            categoria: document.getElementById('p-categoria-select').value,
             medida: document.getElementById('medida').value,
             atual: parseInt(document.getElementById('atual').value) || 0,
             ideal: parseInt(document.getElementById('ideal').value) || 0
         };
-        if(!p.nome) return alert("O nome é obrigatório!");
+        if(!p.nome) return alert("Nome é obrigatório!");
         produtos.push(p);
-        salvarLocal();
-        document.querySelectorAll('input').forEach(i => i.value = '');
+        salvarTudo();
+        document.querySelectorAll('#tela-cadastro input').forEach(i => i.value = '');
         mudarTela('inicio');
     }
 
@@ -246,22 +199,18 @@
         if(ordem === 'az') filtrados.sort((a,b) => a.nome.localeCompare(b.nome));
         else filtrados.sort((a,b) => (a.atual - a.ideal) - (b.atual - b.ideal));
 
-        const temFalta = produtos.some(p => p.atual < p.ideal);
-        document.getElementById('btn-zap').classList.toggle('hidden', !temFalta);
+        document.getElementById('btn-zap').classList.toggle('hidden', !produtos.some(p => p.atual < p.ideal));
 
-        container.innerHTML = filtrados.map(p => {
-            const isLow = p.atual < p.ideal;
-            return `
-                <div class="card">
-                    <span class="badge ${isLow ? 'low' : 'ok'}">${isLow ? 'COMPRAR' : 'OK'}</span>
-                    <div class="prod-info">
-                        <span>${p.categoria} | ${p.marca}</span>
-                        <h3>${p.nome}</h3>
-                        <small>Estoque: <b>${p.atual}</b> de ${p.ideal} (${p.medida})</small>
-                    </div>
+        container.innerHTML = filtrados.map(p => `
+            <div class="card">
+                <span class="badge ${p.atual < p.ideal ? 'low' : 'ok'}">${p.atual < p.ideal ? 'FALTA' : 'OK'}</span>
+                <div class="prod-info">
+                    <span>${p.categoria}</span>
+                    <h3>${p.nome}</h3>
+                    <small>${p.marca} | ${p.atual}/${p.ideal} ${p.medida}</small>
                 </div>
-            `;
-        }).join('');
+            </div>
+        `).join('');
     }
 
     function renderContagem() {
@@ -270,59 +219,39 @@
             <div class="card">
                 <div style="display:flex; justify-content:space-between; align-items:center">
                     <strong>${p.nome}</strong>
-                    <button onclick="remover(${p.id})" style="border:none; background:none; font-size:1.2rem; cursor:pointer">🗑️</button>
+                    <button onclick="removerProd(${p.id})" style="border:none; background:none; cursor:pointer">🗑️</button>
                 </div>
-                <div class="inv-row">
-                    <span>Qtd Atual:</span>
-                    <input type="number" value="${p.atual}" onchange="atualizar(${p.id}, this.value)">
-                    <span style="color:#888; font-size:0.8rem">Meta: ${p.ideal}</span>
+                <div style="display:flex; align-items:center; gap:10px; margin-top:10px; border-top:1px solid #eee; padding-top:10px;">
+                    <input type="number" value="${p.atual}" onchange="atuProd(${p.id}, this.value)" style="width:60px; padding:5px; border-radius:5px; border:1px solid #ddd">
+                    <small>Meta: ${p.ideal}</small>
                 </div>
             </div>
         `).join('');
     }
 
-    function atualizar(id, valor) {
-        const idx = produtos.findIndex(p => p.id === id);
-        produtos[idx].atual = parseInt(valor) || 0;
-        salvarLocal();
+    function atuProd(id, v) { 
+        const i = produtos.findIndex(p => p.id === id);
+        produtos[i].atual = parseInt(v) || 0;
+        salvarTudo();
     }
 
-    function remover(id) {
-        if(confirm("Remover permanentemente?")) {
+    function removerProd(id) {
+        if(confirm("Excluir produto?")) {
             produtos = produtos.filter(p => p.id !== id);
-            salvarLocal();
+            salvarTudo();
             renderContagem();
         }
     }
 
     function enviarWhatsApp() {
-        const compras = produtos.filter(p => p.atual < p.ideal);
-        let msg = "*🛒 LISTA DE COMPRAS SMART STOCK*\n\n";
-        compras.forEach(p => msg += `• *${p.nome}* (${p.marca})\n  Faltam: *${p.ideal - p.atual} ${p.medida}*\n\n`);
+        const faltas = produtos.filter(p => p.atual < p.ideal);
+        let msg = "*🛒 LISTA DE COMPRAS*\n\n";
+        faltas.forEach(p => msg += `• *${p.nome}* (${p.marca})\n  Comprar: *${p.ideal - p.atual} ${p.medida}*\n\n`);
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
     }
 
-    function exportar() {
-        const blob = new Blob([JSON.stringify(produtos)], {type: "application/json"});
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = 'estoque_reserva.json'; a.click();
-    }
-
-    function importar(e) {
-        const reader = new FileReader();
-        reader.onload = () => {
-            if(confirm("Importar dados? Isso substituirá o estoque atual.")){
-                produtos = JSON.parse(reader.result);
-                salvarLocal();
-                renderHome();
-            }
-        };
-        reader.readAsText(e.target.files[0]);
-    }
-
     // Init
-    salvarLocal();
+    salvarTudo();
     renderHome();
 </script>
 
