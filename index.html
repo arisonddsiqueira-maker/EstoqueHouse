@@ -3,294 +3,245 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Stock</title>
+    <title>Smart Stock Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #f0f2f5;
-            --glass: rgba(255, 255, 255, 0.8);
+            --bg: #f8f9fa;
             --primary: #4361ee;
-            --secondary: #3f37c9;
-            --accent: #4cc9f0;
             --danger: #f72585;
             --success: #4caf50;
             --text: #2b2d42;
+            --card-bg: #ffffff;
         }
 
         body { 
             font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg);
-            background-image: radial-gradient(at 0% 0%, rgba(67, 97, 238, 0.15) 0px, transparent 50%), 
-                              radial-gradient(at 100% 100%, rgba(76, 201, 240, 0.15) 0px, transparent 50%);
+            background: var(--bg);
             margin: 0; 
-            padding-bottom: 90px;
+            padding-bottom: 100px;
             color: var(--text);
-            min-height: 100vh;
         }
 
         header { 
-            padding: 25px 20px; 
-            text-align: left; 
-            background: var(--glass);
-            backdrop-filter: blur(10px);
+            padding: 20px; 
+            background: white;
             position: sticky;
             top: 0;
             z-index: 100;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         }
 
-        h1 { margin: 0; font-size: 1.5rem; font-weight: 800; color: var(--primary); }
+        h1 { margin: 0; font-size: 1.3rem; color: var(--primary); display: flex; justify-content: space-between; align-items: center; }
 
-        .container { padding: 20px; max-width: 600px; margin: auto; }
+        .container { padding: 15px; max-width: 500px; margin: auto; }
 
-        /* Controles de Filtro */
-        .controls {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+        /* Filtros */
+        .controls { display: flex; gap: 10px; margin-bottom: 20px; }
+        select { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid #ddd; background: white; font-size: 0.9rem; }
 
-        select, input {
-            padding: 12px;
-            border-radius: 12px;
-            border: 1px solid rgba(0,0,0,0.05);
-            background: white;
-            font-family: inherit;
-            font-size: 0.9rem;
-            outline: none;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
-        }
-
-        /* Cards Estilizados */
+        /* Cards */
         .card { 
-            background: var(--glass);
-            backdrop-filter: blur(5px);
-            padding: 18px; 
-            border-radius: 20px; 
-            margin-bottom: 15px; 
-            border: 1px solid rgba(255,255,255,0.5);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
-            transition: transform 0.2s;
+            background: var(--card-bg);
+            padding: 15px; 
+            border-radius: 15px; 
+            margin-bottom: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            border: 1px solid #eee;
         }
 
-        .product-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .product-info h3 { margin: 0; font-size: 1.1rem; }
-        .product-info span { font-size: 0.8rem; color: #666; font-weight: 600; text-transform: uppercase; }
+        .prod-info h3 { margin: 0 0 5px 0; font-size: 1rem; }
+        .prod-info span { font-size: 0.75rem; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        .stock-badge {
-            padding: 6px 12px;
-            border-radius: 10px;
-            font-size: 0.8rem;
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 8px;
+            font-size: 0.75rem;
             font-weight: bold;
+            float: right;
         }
 
-        .status-low { background: #ffe5ec; color: var(--danger); }
-        .status-ok { background: #e8f5e9; color: var(--success); }
+        .low { background: #ffe5ec; color: var(--danger); }
+        .ok { background: #e8f5e9; color: var(--success); }
 
-        /* Botão Flutuante / NavBar */
-        nav { 
-            position: fixed; 
-            bottom: 20px; 
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            max-width: 400px;
-            background: var(--text);
-            display: flex; 
-            border-radius: 25px;
+        /* Inputs de Contagem */
+        .counter-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed #eee;
+        }
+        
+        .counter-group input {
+            width: 60px;
             padding: 8px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        /* Nav */
+        nav { 
+            position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+            width: 90%; max-width: 400px; background: #1a1a1a;
+            display: flex; border-radius: 20px; padding: 5px; box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
         nav button { 
-            flex: 1; 
-            border: none; 
-            background: none; 
-            color: #a2a2a2; 
-            padding: 12px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            cursor: pointer;
-            transition: 0.3s;
+            flex: 1; border: none; background: none; color: #888; 
+            padding: 12px; font-size: 0.7rem; font-weight: bold; cursor: pointer;
         }
 
-        nav button.active { color: white; background: rgba(255,255,255,0.1); border-radius: 18px; }
+        nav button.active { color: white; background: var(--primary); border-radius: 15px; }
 
-        .btn-main {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 15px;
-            width: 100%;
-            font-weight: 700;
-            margin-top: 10px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3);
+        .btn-add {
+            background: var(--primary); color: white; border: none;
+            width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 1rem; margin-top: 10px;
         }
 
-        .hidden { display: none; }
-        
-        /* Lista de Compras Rapida */
-        .shopping-alert {
-            background: var(--danger);
-            color: white;
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
+        .shopping-btn {
+            background: var(--danger); color: white; padding: 15px;
+            border-radius: 12px; text-align: center; margin-bottom: 20px;
+            font-weight: bold; cursor: pointer; display: none;
         }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <header>
-    <h1>Smart Stock 📦</h1>
+    <h1>Smart Stock <span>📦</span></h1>
 </header>
 
 <div class="container">
     
     <section id="tela-inicio">
-        <div id="shopping-summary" class="shopping-alert hidden" onclick="enviarWhatsApp()">
-            <div>
-                <strong>Lista de Compras Pronta!</strong>
-                <div style="font-size: 0.8rem; opacity: 0.9;">Toque para enviar via WhatsApp</div>
-            </div>
-            <span>➔</span>
+        <div id="btn-whats" class="shopping-btn" onclick="enviarWhatsApp()">
+            🛒 Enviar Lista de Compras
         </div>
 
         <div class="controls">
-            <select id="filter-cat-home" onchange="renderHome()">
-                <option value="Todos">Categorias</option>
-                <option value="Alimentos">Alimentos</option>
-                <option value="Limpeza">Limpeza</option>
-                <option value="Higiene">Higiene</option>
+            <select id="f-cat" onchange="renderHome()">
+                <option value="Todos">Todas Categorias</option>
+                <option>Alimentos</option>
+                <option>Limpeza</option>
+                <option>Higiene</option>
             </select>
-            <select id="sort-order" onchange="renderHome()">
-                <option value="nome">A-Z</option>
-                <option value="estoque">Menor Estoque</option>
+            <select id="f-ordem" onchange="renderHome()">
+                <option value="az">A-Z</option>
+                <option value="falta">O que falta</option>
             </select>
         </div>
 
-        <div id="home-products">
-            </div>
+        <div id="lista-home"></div>
     </section>
 
     <section id="tela-cadastro" class="hidden">
         <div class="card">
-            <h2>Novo Item</h2>
-            <div style="display: grid; gap: 15px;">
-                <input type="text" id="p-nome" placeholder="Nome do Produto (ex: Café)">
-                <div style="display:flex; gap:10px;">
-                    <input type="text" id="p-marca" placeholder="Marca" style="flex:2">
-                    <select id="p-categoria" style="flex:2">
-                        <option>Alimentos</option>
-                        <option>Limpeza</option>
-                        <option>Higiene</option>
-                    </select>
-                </div>
-                <input type="text" id="p-medida" placeholder="Medida (Ex: 500g, 1L, un)">
-                <div style="display:flex; gap:10px;">
-                    <div style="flex:1">
-                        <label style="font-size:0.7rem; margin-left:5px">ATUAL</label>
-                        <input type="number" id="p-atual" placeholder="0">
-                    </div>
-                    <div style="flex:1">
-                        <label style="font-size:0.7rem; margin-left:5px">IDEAL</label>
-                        <input type="number" id="p-ideal" placeholder="10">
-                    </div>
-                </div>
-                <button class="btn-main" onclick="salvarProduto()">Cadastrar Produto</button>
+            <h2 style="margin-top:0">Novo Produto</h2>
+            <input type="text" id="nome" placeholder="Nome (ex: Arroz)" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+            <div style="display:flex; gap:10px; margin-bottom:10px">
+                <input type="text" id="marca" placeholder="Marca" style="flex:1; width:50%">
+                <select id="categoria" style="flex:1">
+                    <option>Alimentos</option>
+                    <option>Limpeza</option>
+                    <option>Higiene</option>
+                </select>
             </div>
+            <input type="text" id="medida" placeholder="Medida (kg, un, L)" style="width:100%; margin-bottom:10px; box-sizing:border-box">
+            <div style="display:flex; gap:10px">
+                <input type="number" id="atual" placeholder="Qtd Atual" style="flex:1; width:50%">
+                <input type="number" id="ideal" placeholder="Qtd Ideal" style="flex:1; width:50%">
+            </div>
+            <button class="btn-add" onclick="salvar()">Salvar no Estoque</button>
         </div>
     </section>
 
     <section id="tela-contagem" class="hidden">
-        <h2>Inventário</h2>
-        <div id="lista-contagem"></div>
+        <h2>Inventário Rápido</h2>
+        <div id="lista-inventario"></div>
     </section>
 </div>
 
 <nav>
-    <button onclick="mudarTela('inicio')" id="btn-inicio" class="active">INÍCIO</button>
-    <button onclick="mudarTela('cadastro')" id="btn-cadastro">CADASTRAR</button>
-    <button onclick="mudarTela('contagem')" id="btn-contagem">ESTOQUE</button>
+    <button onclick="mudarTela('inicio')" id="btn-nav-inicio" class="active">INÍCIO</button>
+    <button onclick="mudarTela('cadastro')" id="btn-nav-cadastro">CADASTRAR</button>
+    <button onclick="mudarTela('contagem')" id="btn-nav-contagem">ESTOQUE</button>
 </nav>
 
 <script>
-    let produtos = JSON.parse(localStorage.getItem('smartStock_v1')) || [];
+    // 1. Carregamento inicial robusto
+    let produtos = JSON.parse(localStorage.getItem('db_estoque_v2')) || [];
+
+    function salvarLocal() {
+        localStorage.setItem('db_estoque_v2', JSON.stringify(produtos));
+    }
 
     function mudarTela(tela) {
         document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
         document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+        
         document.getElementById('tela-' + tela).classList.remove('hidden');
-        document.getElementById('btn-' + tela).classList.add('active');
+        document.getElementById('btn-nav-' + tela).classList.add('active');
+
         if(tela === 'inicio') renderHome();
         if(tela === 'contagem') renderContagem();
     }
 
-    function salvarProduto() {
+    function salvar() {
         const p = {
             id: Date.now(),
-            nome: document.getElementById('p-nome').value,
-            marca: document.getElementById('p-marca').value,
-            categoria: document.getElementById('p-categoria').value,
-            medida: document.getElementById('p-medida').value,
-            atual: parseInt(document.getElementById('p-atual').value) || 0,
-            ideal: parseInt(document.getElementById('p-ideal').value) || 0
+            nome: document.getElementById('nome').value,
+            marca: document.getElementById('marca').value,
+            categoria: document.getElementById('categoria').value,
+            medida: document.getElementById('medida').value,
+            atual: parseInt(document.getElementById('atual').value) || 0,
+            ideal: parseInt(document.getElementById('ideal').value) || 0
         };
 
-        if(!p.nome) return alert("Dê um nome ao produto!");
+        if(!p.nome) return alert("Por favor, digite o nome.");
+
         produtos.push(p);
-        localStorage.setItem('smartStock_v1', JSON.stringify(produtos));
-        mudarTela('inicio');
-        // Limpar campos
+        salvarLocal();
+        alert("Salvo!");
+        
+        // Limpa campos
         document.querySelectorAll('input').forEach(i => i.value = '');
+        mudarTela('inicio');
     }
 
     function renderHome() {
-        const container = document.getElementById('home-products');
-        const cat = document.getElementById('filter-cat-home').value;
-        const sort = document.getElementById('sort-order').value;
+        const container = document.getElementById('lista-home');
+        const filtroCat = document.getElementById('f-cat').value;
+        const ordem = document.getElementById('f-ordem').value;
         
         let lista = [...produtos];
 
-        // Filtro
-        if(cat !== 'Todos') lista = lista.filter(p => p.categoria === cat);
+        if(filtroCat !== 'Todos') lista = lista.filter(p => p.categoria === filtroCat);
 
-        // Ordenação
-        if(sort === 'nome') {
+        if(ordem === 'az') {
             lista.sort((a,b) => a.nome.localeCompare(b.nome));
         } else {
-            lista.sort((a,b) => (a.atual/a.ideal) - (b.atual/b.ideal));
+            lista.sort((a,b) => (a.atual - a.ideal) - (b.atual - b.ideal));
         }
 
-        // Alerta de compras
-        const temCompras = produtos.some(p => p.atual < p.ideal);
-        document.getElementById('shopping-summary').classList.toggle('hidden', !temCompras);
-
-        if(lista.length === 0) {
-            container.innerHTML = `<div style="text-align:center; padding:50px; opacity:0.5">Nenhum produto encontrado.</div>`;
-            return;
-        }
+        // Mostrar botão Whats se houver falta
+        const temFalta = produtos.some(p => p.atual < p.ideal);
+        document.getElementById('btn-whats').style.display = temFalta ? 'block' : 'none';
 
         container.innerHTML = lista.map(p => {
-            const isLow = p.atual < p.ideal;
+            const status = p.atual < p.ideal ? 'low' : 'ok';
+            const textoStatus = p.atual < p.ideal ? `Faltam ${p.ideal - p.atual}` : 'OK';
             return `
                 <div class="card">
-                    <div class="product-header">
-                        <div class="product-info">
-                            <span>${p.categoria}</span>
-                            <h3>${p.nome}</h3>
-                            <small>${p.marca} | ${p.medida}</small>
-                        </div>
-                        <div class="stock-badge ${isLow ? 'status-low' : 'status-ok'}">
-                            ${p.atual} / ${p.ideal}
-                        </div>
+                    <span class="status-badge ${status}">${textoStatus}</span>
+                    <div class="prod-info">
+                        <span>${p.categoria}</span>
+                        <h3>${p.nome}</h3>
+                        <small>${p.marca} | ${p.medida}</small>
                     </div>
                 </div>
             `;
@@ -298,45 +249,49 @@
     }
 
     function renderContagem() {
-        const container = document.getElementById('lista-contagem');
+        const container = document.getElementById('lista-inventario');
         container.innerHTML = produtos.map(p => `
             <div class="card">
-                <div style="display:flex; justify-content:space-between">
+                <div style="display:flex; justify-content:space-between; align-items:center">
                     <strong>${p.nome}</strong>
-                    <button onclick="excluir(${p.id})" style="background:none; border:none; color:red">🗑️</button>
+                    <button onclick="remover(${p.id})" style="border:none; background:none; color:red">🗑️</button>
                 </div>
-                <div style="margin-top:10px; display:flex; align-items:center; gap:15px">
-                    <input type="number" value="${p.atual}" onchange="updateQtd(${p.id}, this.value)" style="width:80px">
-                    <small>Meta: ${p.ideal}</small>
+                <div class="counter-group">
+                    <span>Estoque Atual:</span>
+                    <input type="number" value="${p.atual}" onchange="atualizarQtd(${p.id}, this.value)">
+                    <small style="color:#888">Meta: ${p.ideal}</small>
                 </div>
             </div>
         `).join('');
     }
 
-    function updateQtd(id, val) {
-        const i = produtos.findIndex(p => p.id === id);
-        produtos[i].atual = parseInt(val) || 0;
-        localStorage.setItem('smartStock_v1', JSON.stringify(produtos));
+    function atualizarQtd(id, novaQtd) {
+        const index = produtos.findIndex(p => p.id === id);
+        if(index !== -1) {
+            produtos[index].atual = parseInt(novaQtd) || 0;
+            salvarLocal();
+            // Feedback visual rápido sem resetar a tela
+        }
     }
 
-    function excluir(id) {
-        if(confirm("Remover item?")) {
+    function remover(id) {
+        if(confirm("Excluir este produto permanentemente?")) {
             produtos = produtos.filter(p => p.id !== id);
-            localStorage.setItem('smartStock_v1', JSON.stringify(produtos));
+            salvarLocal();
             renderContagem();
         }
     }
 
     function enviarWhatsApp() {
         const faltantes = produtos.filter(p => p.atual < p.ideal);
-        let msg = "*🛒 LISTA DE COMPRAS SMART STOCK*\n\n";
+        let msg = "*🛒 LISTA DE COMPRAS*\n\n";
         faltantes.forEach(p => {
-            msg += `• *${p.nome}* (${p.marca})\n   Faltam: *${p.ideal - p.atual} ${p.medida}*\n\n`;
+            msg += `• *${p.nome}* (${p.marca})\n  Comprar: *${p.ideal - p.atual} ${p.medida}*\n\n`;
         });
         window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`);
     }
 
-    // Init
+    // Inicializa a primeira tela
     renderHome();
 </script>
 
