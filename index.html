@@ -11,12 +11,10 @@
         h1 { margin: 0; font-size: 1.2rem; color: #4361ee; }
         .container { padding: 10px; max-width: 500px; margin: auto; }
         
-        /* Botão WhatsApp - Estilo Reforçado */
         .btn-zap { 
             background: #f72585; color: #fff; border: none; padding: 15px; 
             border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; 
             font-size: 1rem; margin-bottom: 15px; display: none; 
-            box-shadow: 0 4px 10px rgba(247, 37, 133, 0.3);
         }
 
         .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
@@ -33,6 +31,7 @@
         nav button.active { color: #fff; border-bottom: 2px solid #fff; }
         
         .hidden { display: none !important; }
+        .btn-edit { background: none; border: none; color: #4361ee; font-weight: bold; cursor: pointer; margin-right: 10px; }
     </style>
 </head>
 <body>
@@ -42,25 +41,25 @@
 <div class="container">
     <section id="t-inicio">
         <button id="btn-whatsapp" class="btn-zap" onclick="enviarZap()">🛒 ENVIAR LISTA (WHATSAPP)</button>
-        
         <div style="display: flex; gap: 5px;">
             <input type="text" id="busca" class="input" placeholder="Pesquisar..." oninput="renderHome()">
             <select id="filtro-cat" class="input" onchange="renderHome()" style="flex: 1;"></select>
         </div>
-
         <div id="lista-home"></div>
     </section>
 
     <section id="t-cadastro" class="hidden">
         <div class="card">
-            <h3>Novo Produto</h3>
+            <h3 id="titulo-form">Novo Produto</h3>
+            <input type="hidden" id="edit-id">
             <input type="text" id="p-nome" class="input" placeholder="Nome">
             <input type="text" id="p-marca" class="input" placeholder="Marca">
             <select id="p-cat" class="input"></select>
             <input type="text" id="p-medida" class="input" placeholder="Medida (kg, un, l)">
             <input type="number" id="p-atual" class="input" placeholder="Qtd Atual">
             <input type="number" id="p-ideal" class="input" placeholder="Meta Ideal">
-            <button class="btn-blue" onclick="salvar()">SALVAR NO ESTOQUE</button>
+            <button id="btn-salvar" class="btn-blue" onclick="salvar()">SALVAR NO ESTOQUE</button>
+            <button id="btn-cancelar" class="btn-blue hidden" onclick="cancelarEdicao()" style="background:#888; margin-top:5px;">CANCELAR</button>
         </div>
     </section>
 
@@ -88,7 +87,6 @@
 </nav>
 
 <script>
-    // Garantindo as chaves corretas
     var prods = JSON.parse(localStorage.getItem('ss_p')) || [];
     var cats = JSON.parse(localStorage.getItem('ss_c')) || ["Alimentos", "Limpeza", "Higiene"];
 
@@ -101,10 +99,10 @@
     function atualizarSelects() {
         var h = "";
         var f = '<option value="Todos">Todas</option>';
-        cats.sort().forEach(function(c) {
-            h += '<option value="'+c+'">'+c+'</option>';
-            f += '<option value="'+c+'">'+c+'</option>';
-        });
+        for (var i = 0; i < cats.length; i++) {
+            h += '<option value="'+cats[i]+'">'+cats[i]+'</option>';
+            f += '<option value="'+cats[i]+'">'+cats[i]+'</option>';
+        }
         document.getElementById('p-cat').innerHTML = h;
         document.getElementById('filtro-cat').innerHTML = f;
     }
@@ -114,41 +112,73 @@
         document.getElementById('t-cadastro').classList.add('hidden');
         document.getElementById('t-estoque').classList.add('hidden');
         document.getElementById('t-config').classList.add('hidden');
-        
         document.getElementById('b-inicio').classList.remove('active');
         document.getElementById('b-cadastro').classList.remove('active');
         document.getElementById('b-estoque').classList.remove('active');
         document.getElementById('b-config').classList.remove('active');
-
         document.getElementById('t-' + tela).classList.remove('hidden');
         document.getElementById('b-' + tela).classList.add('active');
-
         if(tela === 'inicio') renderHome();
         if(tela === 'estoque') renderEstoque();
         if(tela === 'config') renderCats();
     }
 
     function salvar() {
-        var n = document.getElementById('p-nome').value;
-        if(!n) { alert("Nome é obrigatório!"); return; }
-        
+        var idEdit = document.getElementById('edit-id').value;
+        var nome = document.getElementById('p-nome').value;
+        if(!nome) return alert("Nome obrigatório!");
+
         var p = {
-            id: Date.now(),
-            n: n,
+            id: idEdit ? parseInt(idEdit) : Date.now(),
+            n: nome,
             m: document.getElementById('p-marca').value,
             c: document.getElementById('p-cat').value,
             u: document.getElementById('p-medida').value || 'un',
             a: parseInt(document.getElementById('p-atual').value) || 0,
             i: parseInt(document.getElementById('p-ideal').value) || 0
         };
-        prods.push(p);
+
+        if(idEdit) {
+            for(var x=0; x<prods.length; x++) { if(prods[x].id === p.id) prods[x] = p; }
+            alert("Produto atualizado!");
+        } else {
+            prods.push(p);
+            alert("Produto salvo!");
+        }
+
         persistir();
-        alert("Produto salvo!");
+        cancelarEdicao();
+        mudar('inicio');
+    }
+
+    function editarProd(id) {
+        var p = null;
+        for(var x=0; x<prods.length; x++) { if(prods[x].id === id) p = prods[x]; }
+        if(!p) return;
+
+        document.getElementById('edit-id').value = p.id;
+        document.getElementById('p-nome').value = p.n;
+        document.getElementById('p-marca').value = p.m;
+        document.getElementById('p-cat').value = p.c;
+        document.getElementById('p-medida').value = p.u;
+        document.getElementById('p-atual').value = p.a;
+        document.getElementById('p-ideal').value = p.i;
+
+        document.getElementById('titulo-form').innerText = "Editar Produto";
+        document.getElementById('btn-salvar').innerText = "ATUALIZAR DADOS";
+        document.getElementById('btn-cancelar').classList.remove('hidden');
+        mudar('cadastro');
+    }
+
+    function cancelarEdicao() {
+        document.getElementById('edit-id').value = "";
         document.getElementById('p-nome').value = "";
         document.getElementById('p-marca').value = "";
         document.getElementById('p-atual').value = "";
         document.getElementById('p-ideal').value = "";
-        mudar('inicio');
+        document.getElementById('titulo-form').innerText = "Novo Produto";
+        document.getElementById('btn-salvar').innerText = "SALVAR NO ESTOQUE";
+        document.getElementById('btn-cancelar').classList.add('hidden');
     }
 
     function renderHome() {
@@ -160,25 +190,18 @@
 
         for (var i = 0; i < prods.length; i++) {
             var p = prods[i];
-            var matchBusca = p.n.toLowerCase().indexOf(busca) !== -1 || p.m.toLowerCase().indexOf(busca) !== -1;
-            var matchCat = filtro === "Todos" || p.c === filtro;
-
-            if (matchBusca && matchCat) {
+            if ((p.n.toLowerCase().indexOf(busca) !== -1 || p.m.toLowerCase().indexOf(busca) !== -1) && (filtro === "Todos" || p.c === filtro)) {
                 var falta = p.i - p.a;
                 var low = falta > 0;
                 if (low) temFalta = true;
-
-                html += '<div class="card ' + (low ? 'low-stock' : '') + '">' +
-                        '<span class="badge ' + (low ? 'bg-low' : 'bg-ok') + '">' + (low ? 'FALTA' : 'OK') + '</span>' +
-                        '<strong>' + p.n + '</strong><br><small>' + p.m + ' ('+p.c+')</small><br>' +
-                        (low ? '<b style="color:#f72585; display:block; margin-top:5px;">Faltam: ' + falta + ' ' + p.u + '</b>' : '<span style="color:#4caf50; display:block; margin-top:5px;">Estoque OK</span>') +
+                html += '<div class="card '+(low?'low-stock':'')+'"><span class="badge '+(low?'bg-low':'bg-ok')+'">'+(low?'FALTA':'OK')+'</span>' +
+                        '<strong>'+p.n+'</strong><br><small>'+p.m+' ('+p.c+')</small><br>' +
+                        (low?'<b style="color:#f72585; display:block; margin-top:5px;">Faltam: '+falta+' '+p.u+'</b>':'<span style="color:#4caf50; display:block; margin-top:5px;">Estoque OK</span>') +
                         '<small style="color:#999">Ideal: '+p.i+' | Atual: '+p.a+'</small></div>';
             }
         }
-
-        var btnZap = document.getElementById('btn-whatsapp');
-        btnZap.style.display = temFalta ? "block" : "none";
-        container.innerHTML = html || "<p style='text-align:center; color:#999;'>Nenhum item encontrado.</p>";
+        document.getElementById('btn-whatsapp').style.display = temFalta ? "block" : "none";
+        container.innerHTML = html || "<p style='text-align:center; color:#999;'>Nenhum item.</p>";
     }
 
     function renderEstoque() {
@@ -186,72 +209,23 @@
         var ordenados = prods.slice().sort(function(a,b){ return a.n.localeCompare(b.n); });
         for (var i = 0; i < ordenados.length; i++) {
             var p = ordenados[i];
-            h += '<div class="card"><strong>' + p.n + '</strong>' +
-                 '<button onclick="deleteP('+p.id+')" style="float:right; border:none; background:none; color:red; font-weight:bold;">🗑️</button>' +
+            h += '<div class="card"><strong>'+p.n+'</strong>' +
+                 '<div style="float:right;"><button class="btn-edit" onclick="editarProd('+p.id+')">✏️</button>' +
+                 '<button onclick="deleteP('+p.id+')" style="border:none; background:none; color:red; font-weight:bold;">🗑️</button></div>' +
                  '<div style="margin-top:10px; display:flex; align-items:center; gap:10px;">' +
                  'Qtd: <input type="number" value="'+p.a+'" onchange="atu('+p.id+', this.value)" style="width:65px; padding:5px; border:1px solid #ddd; border-radius:8px;">' +
                  '<small style="color:#888">Meta: '+p.i+' '+p.u+'</small></div></div>';
         }
-        document.getElementById('lista-estoque').innerHTML = h || "<p style='text-align:center'>Estoque vazio.</p>";
+        document.getElementById('lista-estoque').innerHTML = h || "<p style='text-align:center'>Vazio.</p>";
     }
 
-    function atu(id, v) {
-        for (var i = 0; i < prods.length; i++) {
-            if (prods[i].id === id) {
-                prods[i].a = parseInt(v) || 0;
-                persistir();
-                break;
-            }
-        }
-    }
+    function deleteP(id) { if(confirm("Excluir item?")) { prods = prods.filter(function(x){return x.id!==id;}); persistir(); renderEstoque(); } }
+    function atu(id, v) { for(var x=0; x<prods.length; x++) { if(prods[x].id === id) prods[x].a = parseInt(v)||0; } persistir(); }
+    function addCat() { var n = document.getElementById('new-cat').value; if(n && cats.indexOf(n)===-1){ cats.push(n); persistir(); renderCats(); document.getElementById('new-cat').value=""; } }
+    function renderCats() { var h = ""; for (var i=0; i<cats.length; i++) { h += '<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>'+cats[i]+'</span><button onclick="delCat(\''+cats[i]+'\')" style="color:red; border:none; background:none; font-weight:bold;">X</button></div>'; } document.getElementById('lista-cats').innerHTML = h; }
+    function delCat(n) { if(prods.some(function(p){return p.c===n;})){alert("Em uso!"); return;} cats=cats.filter(function(c){return c!==n;}); persistir(); renderCats(); }
+    function enviarZap() { var m = "*🛒 LISTA DE COMPRAS*\n\n"; var tem = false; for(var i=0; i<prods.length; i++){ var p=prods[i]; if(p.i > p.a){ m += "• *"+p.n+"*: Faltam "+(p.i-p.a)+" "+p.u+"\n"; tem=true; } } if(tem) window.open("https://wa.me/?text="+encodeURI(m)); }
 
-    function deleteP(id) {
-        if(confirm("Excluir este item?")) {
-            prods = prods.filter(function(x) { return x.id !== id; });
-            persistir();
-            renderEstoque();
-        }
-    }
-
-    function addCat() {
-        var n = document.getElementById('new-cat').value;
-        if(n && cats.indexOf(n) === -1) {
-            cats.push(n);
-            persistir();
-            renderCats();
-            document.getElementById('new-cat').value = "";
-        }
-    }
-
-    function renderCats() {
-        var h = "";
-        for (var i = 0; i < cats.length; i++) {
-            h += '<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>'+cats[i]+'</span><button onclick="delCat(\''+cats[i]+'\')" style="color:red; border:none; background:none; font-weight:bold;">X</button></div>';
-        }
-        document.getElementById('lista-cats').innerHTML = h;
-    }
-
-    function delCat(n) {
-        if(prods.some(function(p){ return p.c === n; })) { alert("Categoria em uso!"); return; }
-        cats = cats.filter(function(c){ return c !== n; });
-        persistir();
-        renderCats();
-    }
-
-    function enviarZap() {
-        var m = "*🛒 MINHA LISTA DE COMPRAS*\n\n";
-        var algum = false;
-        for (var i = 0; i < prods.length; i++) {
-            var p = prods[i];
-            if (p.i > p.a) {
-                m += "• *" + p.n + "*: Faltam " + (p.i - p.a) + " " + p.u + "\n";
-                algum = true;
-            }
-        }
-        if (algum) window.open("https://wa.me/?text=" + encodeURIComponent(m));
-    }
-
-    // Inicialização
     persistir();
     renderHome();
 </script>
