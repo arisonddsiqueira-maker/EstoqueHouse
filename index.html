@@ -11,10 +11,13 @@
         h1 { margin: 0; font-size: 1.2rem; color: #4361ee; }
         .container { padding: 10px; max-width: 500px; margin: auto; }
         
+        /* BOTÃO WHATSAPP - DESTAQUE MÁXIMO */
         .btn-zap { 
-            background: #f72585; color: #fff; border: none; padding: 15px; 
-            border-radius: 10px; width: 100%; font-weight: bold; cursor: pointer; 
-            font-size: 1rem; margin-bottom: 15px; display: none; 
+            background: #25D366; color: #fff; border: none; padding: 18px; 
+            border-radius: 12px; width: 100%; font-weight: 800; cursor: pointer; 
+            font-size: 1rem; margin-bottom: 20px; display: none; 
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            text-transform: uppercase;
         }
 
         .card { background: #fff; padding: 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border: 1px solid #eee; }
@@ -31,7 +34,7 @@
         nav button.active { color: #fff; border-bottom: 2px solid #fff; }
         
         .hidden { display: none !important; }
-        .btn-edit { background: none; border: none; color: #4361ee; font-weight: bold; cursor: pointer; margin-right: 10px; }
+        .btn-edit { background: none; border: none; color: #4361ee; font-weight: bold; cursor: pointer; margin-right: 15px; font-size: 1.2rem; }
     </style>
 </head>
 <body>
@@ -40,7 +43,8 @@
 
 <div class="container">
     <section id="t-inicio">
-        <button id="btn-whatsapp" class="btn-zap" onclick="enviarZap()">🛒 ENVIAR LISTA (WHATSAPP)</button>
+        <button id="COMPRAR_ZAP" class="btn-zap" onclick="enviarZap()">📲 ENVIAR LISTA PARA WHATSAPP</button>
+        
         <div style="display: flex; gap: 5px;">
             <input type="text" id="busca" class="input" placeholder="Pesquisar..." oninput="renderHome()">
             <select id="filtro-cat" class="input" onchange="renderHome()" style="flex: 1;"></select>
@@ -140,10 +144,8 @@
 
         if(idEdit) {
             for(var x=0; x<prods.length; x++) { if(prods[x].id === p.id) prods[x] = p; }
-            alert("Produto atualizado!");
         } else {
             prods.push(p);
-            alert("Produto salvo!");
         }
 
         persistir();
@@ -155,7 +157,6 @@
         var p = null;
         for(var x=0; x<prods.length; x++) { if(prods[x].id === id) p = prods[x]; }
         if(!p) return;
-
         document.getElementById('edit-id').value = p.id;
         document.getElementById('p-nome').value = p.n;
         document.getElementById('p-marca').value = p.m;
@@ -163,7 +164,6 @@
         document.getElementById('p-medida').value = p.u;
         document.getElementById('p-atual').value = p.a;
         document.getElementById('p-ideal').value = p.i;
-
         document.getElementById('titulo-form').innerText = "Editar Produto";
         document.getElementById('btn-salvar').innerText = "ATUALIZAR DADOS";
         document.getElementById('btn-cancelar').classList.remove('hidden');
@@ -172,10 +172,7 @@
 
     function cancelarEdicao() {
         document.getElementById('edit-id').value = "";
-        document.getElementById('p-nome').value = "";
-        document.getElementById('p-marca').value = "";
-        document.getElementById('p-atual').value = "";
-        document.getElementById('p-ideal').value = "";
+        document.querySelectorAll('#t-cadastro input').forEach(function(i){ i.value = ""; });
         document.getElementById('titulo-form').innerText = "Novo Produto";
         document.getElementById('btn-salvar').innerText = "SALVAR NO ESTOQUE";
         document.getElementById('btn-cancelar').classList.add('hidden');
@@ -183,6 +180,7 @@
 
     function renderHome() {
         var container = document.getElementById('lista-home');
+        var btnZap = document.getElementById('COMPRAR_ZAP');
         var busca = document.getElementById('busca').value.toLowerCase();
         var filtro = document.getElementById('filtro-cat').value;
         var html = "";
@@ -200,8 +198,15 @@
                         '<small style="color:#999">Ideal: '+p.i+' | Atual: '+p.a+'</small></div>';
             }
         }
-        document.getElementById('btn-whatsapp').style.display = temFalta ? "block" : "none";
-        container.innerHTML = html || "<p style='text-align:center; color:#999;'>Nenhum item.</p>";
+        
+        // FORÇANDO VISIBILIDADE DO BOTÃO
+        if(temFalta) {
+            btnZap.style.display = "block";
+        } else {
+            btnZap.style.display = "none";
+        }
+        
+        container.innerHTML = html || "<p style='text-align:center; color:#999; padding: 20px;'>Nenhum item cadastrado.</p>";
     }
 
     function renderEstoque() {
@@ -224,7 +229,18 @@
     function addCat() { var n = document.getElementById('new-cat').value; if(n && cats.indexOf(n)===-1){ cats.push(n); persistir(); renderCats(); document.getElementById('new-cat').value=""; } }
     function renderCats() { var h = ""; for (var i=0; i<cats.length; i++) { h += '<div style="display:flex; justify-content:space-between; padding:10px; border-bottom:1px solid #eee;"><span>'+cats[i]+'</span><button onclick="delCat(\''+cats[i]+'\')" style="color:red; border:none; background:none; font-weight:bold;">X</button></div>'; } document.getElementById('lista-cats').innerHTML = h; }
     function delCat(n) { if(prods.some(function(p){return p.c===n;})){alert("Em uso!"); return;} cats=cats.filter(function(c){return c!==n;}); persistir(); renderCats(); }
-    function enviarZap() { var m = "*🛒 LISTA DE COMPRAS*\n\n"; var tem = false; for(var i=0; i<prods.length; i++){ var p=prods[i]; if(p.i > p.a){ m += "• *"+p.n+"*: Faltam "+(p.i-p.a)+" "+p.u+"\n"; tem=true; } } if(tem) window.open("https://wa.me/?text="+encodeURI(m)); }
+    function enviarZap() { 
+        var m = "*🛒 MINHA LISTA DE COMPRAS*\n\n"; 
+        var tem = false; 
+        for(var i=0; i<prods.length; i++){ 
+            var p=prods[i]; 
+            if(p.i > p.a){ 
+                m += "• *" + p.n + "*: Faltam " + (p.i-p.a) + " " + p.u + "\n"; 
+                tem=true; 
+            } 
+        } 
+        if(tem) window.open("https://wa.me/?text=" + encodeURIComponent(m)); 
+    }
 
     persistir();
     renderHome();
